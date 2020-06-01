@@ -119,4 +119,6 @@ end
 % Feature Extraction
     feature_out =   feature_extraction(detection_out, feature_opt, opt, Nchan);
 
+% Cluster
+    cluster_out =   clustering(feature_out, detection_out.channel, cluster_opt, opt);
 

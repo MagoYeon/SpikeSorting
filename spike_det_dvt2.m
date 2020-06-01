@@ -312,8 +312,8 @@ if (detect_opt.do_plot)
 	%pause;
 
     fig_det3 = figure('Name',['All Signals with Threshold - Ch: ', num2str(Tmp_plot_ch)],'NumberTitle','off');
-	X = 1:Nsamples;
     p = uipanel('Parent',fig_det3,'BorderType','none'); 
+	X = 1:Nsamples;
 
     subplot(1,1,1,'Parent',p)
     hold on
