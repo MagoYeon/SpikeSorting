@@ -45,6 +45,7 @@ if (feature_opt.do_plot)
 	plot3(feature_out(:,1),feature_out(:,2),spike_ch,'o');
 	title('3D Feature Plot w/ spike channel');
 
+
 %    fig_feat3= figure('Name','Features - every spike per spike channel','NumberTitle','off');
 %    p = uipanel('Parent',fig_feat3,'BorderType','none'); 
 %	fsize = ceil(sqrt(Nchan));
