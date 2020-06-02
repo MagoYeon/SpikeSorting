@@ -28,6 +28,8 @@ fid = fopen([datDir,datName,'.clu.1'], 'r');
 gtClu = int32(fscanf(fid, '%d')); 
 
 fclose(fid);
+
+writematrix(gtClu,[outDir, datName, '_gtClu'], 'Delimiter', 'tab');
 %%
 
 % File read
@@ -120,5 +122,7 @@ end
     feature_out =   feature_extraction(detection_out, feature_opt, opt, Nchan);
 
 % Cluster
-    cluster_out =   clustering(feature_out, detection_out.channel, cluster_opt, opt);
+    cluster_out =   clustering(feature_out, detection_out.channel, detection_out.spike_ch, cluster_opt, opt);
 
+% Evaluation
+    evaluation_out  =   evaluation(cluster_out, gtClu, evaluation_opt, opt);

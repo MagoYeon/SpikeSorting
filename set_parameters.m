@@ -7,11 +7,13 @@ opt.filtered_suffix     = '_filtered';
 opt.detected_suffix     = '_detected_dvt';
 opt.threshold_suffix    = '_dvt_Thr';
 opt.feature_suffix      = '_feature';
+opt.cluster_suffix      = '_cluster';
 
 opt.Fs			=	25000;
 opt.filter_band	=	[300 6000];
 opt.Nchan		=	129;
 opt.plot_ch     =   1;
+opt.NgtClu      =   7;
 
 % detection
 detect_opt.Thr              =   700;
@@ -34,9 +36,14 @@ feature_opt.sum_idx         = detect_opt.align_idx;
 feature_opt.spike_length    = detect_opt.spike_length;
 
 % cluster
-cluster_opt.Ncluster        =   9;
-cluster_opt.feature_weight  =   1;
-cluster_opt.channel_weight  =   1;
+cluster_opt.Ncluster        =   opt.NgtClu+1;
+cluster_opt.feature_weight  =   1;		
+cluster_opt.channel_weight  =   1024; %1024
+
+%evaluation
+evaluation_opt.Ncluster     =   cluster_opt.Ncluster;
+
+
 
 
 % plot
