@@ -8,6 +8,7 @@ detected_suffix		=	opt.detected_suffix;
 feature_suffix		=	opt.detected_suffix;
 cluster_suffix		=	opt.cluster_suffix;
 plot_ch				=	opt.plot_ch;
+NgtClu              =   opt.NgtClu;
 
 Ncluster            =   cluster_opt.Ncluster;
 feature_weight      =   cluster_opt.feature_weight;
@@ -18,6 +19,8 @@ clr = lines(Ncluster);
 
 cluster_input       =   [(in_data*feature_weight), (double(channel)*channel_weight)];
 cluster_input       =   double(cluster_input);
+
+fprintf('NgtClu = %d\nNcluster = %d\n',NgtClu, Ncluster);
 
 fprintf('Time %3.0fs. Clustering Started \n', toc);
 [cluster_out K_C] = kmeans(cluster_input, Ncluster, 'Replicates', 100);

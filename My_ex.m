@@ -29,6 +29,13 @@ gtClu = int32(fscanf(fid, '%d'));
 
 fclose(fid);
 
+if(opt.NgtClu == 0)
+    opt.NgtClu = max(gtClu)-min(gtClu)+1;
+end
+if(cluster_opt.Ncluster == 0)
+    cluster_opt.Ncluster = opt.NgtClu;
+end
+
 writematrix(gtClu,[outDir, datName, '_gtClu'], 'Delimiter', 'tab');
 %%
 
@@ -125,4 +132,4 @@ end
     cluster_out =   clustering(feature_out, detection_out.channel, detection_out.spike_ch, cluster_opt, opt);
 
 % Evaluation
-    evaluation_out  =   evaluation(cluster_out, gtClu, evaluation_opt, opt);
+    evaluation_out  =   evaluation(detection_out.spike_time, cluster_out, gtRes, gtClu(2:end), Nsamples, cluster_opt.Ncluster, opt);

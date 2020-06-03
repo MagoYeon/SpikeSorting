@@ -9,17 +9,18 @@ opt.threshold_suffix    = '_dvt_Thr';
 opt.feature_suffix      = '_feature';
 opt.cluster_suffix      = '_cluster';
 
-opt.Fs			=	25000;
-opt.filter_band	=	[300 6000];
-opt.Nchan		=	129;
-opt.plot_ch     =   1;
-opt.NgtClu      =   7;
+opt.Fs			    =	25000;
+opt.filter_band	    =	[300 6000];
+opt.Nchan		    =	129;
+opt.plot_ch         =   1;
+opt.NgtClu          =   0; % 0 : set automatically
+opt.spike_length    =   30;
 
 % detection
 detect_opt.Thr              =   700;
 detect_opt.Thr_a            =   12;
 detect_opt.reverse          =   1;
-detect_opt.spike_length     =   30;
+detect_opt.spike_length     =   opt.spike_length;
 detect_opt.align_idx        =   15; 
 detect_opt.overlap_range    =   5; % 0 for default : spike_length/2
 detect_opt.detect_method    =   'cnvx';  
@@ -36,7 +37,7 @@ feature_opt.sum_idx         = detect_opt.align_idx;
 feature_opt.spike_length    = detect_opt.spike_length;
 
 % cluster
-cluster_opt.Ncluster        =   opt.NgtClu+1;
+cluster_opt.Ncluster        =   0; %opt.NgtClu+1; % 0 : set automatically
 cluster_opt.feature_weight  =   1;		
 cluster_opt.channel_weight  =   1024; %1024
 
