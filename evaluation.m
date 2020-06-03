@@ -53,10 +53,11 @@ fprintf('\tTrue Negative Rate(TNR) : %f\n', TNR);
 fprintf('\n');
 
 %Reordered cluter output
-cluster_out_RO				=	zeros(Nspike,1);
-cluster_out_tmp				=	cluster_out(gt_mark ~= 0);
-gt_mark_RO					=	gt_mark(gt_mark ~= 0);
-cluster_out_RO(gt_mark_RO)	=	cluster_out_tmp;
+cluster_out_RO					=	zeros(Nspike,1);
+cluster_out_tmp					=	cluster_out(gt_mark ~= 0);
+gt_mark_RO						=	gt_mark(gt_mark ~= 0);
+cluster_out_RO(gt_mark_RO)		=	cluster_out_tmp;
+cluster_out_ROn					=	cluster_out(gt_mark == 0); %false detected
 
 for gt_mean = min(gtClu):max(gtClu)
     for my_clu_mean = 1:Ncluster
@@ -100,5 +101,47 @@ else
 end
 
 fprintf('\n');
+
+CErrorIdx = [];
+cluster_FP = [];
+for i = 1:Ncluster
+% Now I have to consider all cluster output
+    %errorC{i} = find(spikes{6}(cluster_label==i)~=Cmap(i)); % Label i's error
+	tmp_ci		= find(cluster_out==i);		% Positive indexes among whole cluster output
+	tmp_cin		= find(cluster_out~=i);		% Negative indexes among whole cluster output
+	tmp_ro_ci	= find(cluster_out_RO==i);	% Positive indexes among RO
+	tmp_ro_cin	= find(cluster_out_RO~=i);	% Negative indexes among RO
+    if(FCluster == i) %it's FCluster = Error Cluster (* Positive = error)
+		errorC{i}	= find(gt_mark(tmp_ci) ~= 0);				% False Positive
+		errorCn{i}	= find(cluster_out_ROn ~= i);				% False Negative
+    else
+        errorC{i}	= tmp_ro_ci(gtClu(tmp_ro_ci)~=Cmap(i));			% False Positive in cluster_out_RO
+		errorC{i}	= [find(cluster_out_ROn == i) ; errorC{i}];	% Total False Positive (+ROn)
+		errorCn{i}	= tmp_ro_cin(gtClu(tmp_ro_cin)==Cmap(i));			% False Negative
+    end
+    cluster_P		= length(tmp_ci);
+	cluster_FP(i)	= length(errorC{i});
+	cluster_TP(i)	= cluster_P - cluster_FP(i);
+	cluster_N		= length(tmp_cin);
+	cluster_FN(i)	= length(errorCn{i});
+	cluster_TN(i)	= cluster_N - cluster_FN(i);
+	TPR(i)			= cluster_TP(i) / (cluster_TP(i) + cluster_FN(i));
+	TNR(i)			= cluster_TN(i) / (cluster_TN(i) + cluster_FP(i));
+    CErrorIdx = [CErrorIdx ; errorC{i}];
+	fprintf('\tCluster %d-[TPR]:%.2f\t[TNR]:%.2f', i, TPR(i), TNR(i));
+    fprintf('\t[TP/P]:%5.2f%% (%d/%d)\n', 100*cluster_TP(i)/cluster_P, cluster_TP(i),cluster_P);    
+end
+
+fprintf('\n');
+
+
+
+%numFC = length(find(cluster_out==FCluster));
+
+Cluster_error = length(CErrorIdx); % All False Positive
+
+%fprintf('\tFalse Detected Cluster # = %d\n', numFC);
+fprintf('\tCluster True Ratio\t- [TP/ALL]: %5.2f%% (%d/%d)\n', 100*sum(cluster_TP)/Ndetected, sum(cluster_TP), Ndetected);
+fprintf('\tCluster mean ROC\t- [TPR]:%5.2f [TNR]:%5.2f\n', mean(TPR), mean(TNR));
 
 evaluation_out = Ccompare_p;

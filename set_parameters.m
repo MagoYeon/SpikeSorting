@@ -13,7 +13,7 @@ opt.Fs			    =	25000;
 opt.filter_band	    =	[300 6000];
 opt.Nchan		    =	129;
 opt.plot_ch         =   1;
-opt.NgtClu          =   0; % 0 : set automatically
+opt.NgtClu          =   7; % 0 : set automatically
 opt.spike_length    =   30;
 
 % detection
@@ -37,9 +37,9 @@ feature_opt.sum_idx         = detect_opt.align_idx;
 feature_opt.spike_length    = detect_opt.spike_length;
 
 % cluster
-cluster_opt.Ncluster        =   0; %opt.NgtClu+1; % 0 : set automatically
+cluster_opt.Ncluster        =   8; %opt.NgtClu+1; % 0 : set automatically
 cluster_opt.feature_weight  =   1;		
-cluster_opt.channel_weight  =   1024; %1024
+cluster_opt.channel_weight  =   bitshift(1,8);% bitshift(1,10) = %1024
 
 %evaluation
 evaluation_opt.Ncluster     =   cluster_opt.Ncluster;
@@ -51,7 +51,7 @@ evaluation_opt.Ncluster     =   cluster_opt.Ncluster;
 opt.filter_plot             =   0;
 detect_opt.do_plot          =   0;
 feature_opt.do_plot         =   0;
-cluster_opt.do_plot         =   1;
+cluster_opt.do_plot         =   0;
 
 
 

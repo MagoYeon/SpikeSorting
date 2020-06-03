@@ -20,7 +20,8 @@ clr = lines(Ncluster);
 cluster_input       =   [(in_data*feature_weight), (double(channel)*channel_weight)];
 cluster_input       =   double(cluster_input);
 
-fprintf('NgtClu = %d\nNcluster = %d\n',NgtClu, Ncluster);
+fprintf('Cluster Info.\n');
+fprintf('\tNgtClu = %d\n\tNcluster = %d\n\tChannel Weight = %d\n',NgtClu, Ncluster, channel_weight);
 
 fprintf('Time %3.0fs. Clustering Started \n', toc);
 [cluster_out K_C] = kmeans(cluster_input, Ncluster, 'Replicates', 100);
