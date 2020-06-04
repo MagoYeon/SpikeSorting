@@ -9,6 +9,7 @@ feature_suffix		=	opt.detected_suffix;
 cluster_suffix		=	opt.cluster_suffix;
 plot_ch				=	opt.plot_ch;
 NgtClu              =   opt.NgtClu;
+spike_length		=	opt.spike_length;
 
 Ncluster            =   cluster_opt.Ncluster;
 feature_weight      =   cluster_opt.feature_weight;
@@ -16,6 +17,7 @@ channel_weight      =   cluster_opt.channel_weight;
 do_plot             =   cluster_opt.do_plot;
 
 clr = lines(Ncluster);
+
 
 cluster_input       =   [(in_data*feature_weight), (double(channel)*channel_weight)];
 cluster_input       =   double(cluster_input);

@@ -51,6 +51,8 @@ fprintf('\n');
 fprintf('\tTrue Positive Rate(TPR) : %f\n', TPR);
 fprintf('\tTrue Negative Rate(TNR) : %f\n', TNR);
 fprintf('\n');
+fprintf('\tDetection Accuracy\t- [TP/P]: %5.2f%% (%d/%d)\n', 100*detection_TP/Ndetected, detection_TP, Ndetected);
+fprintf('\n');
 
 %Reordered cluter output
 cluster_out_RO					=	zeros(Nspike,1);
@@ -69,7 +71,7 @@ for gt_mean = min(gtClu):max(gtClu)
 end
 
 for gt_mean = min(gtClu):max(gtClu)
-    fprintf('\tgtClu:%d = ', gt_mean);
+    fprintf('\tgtClu:%d [%5d] =', gt_mean, length(find(gtClu==gt_mean)));
     for my_clu_mean = 1:Ncluster
         fprintf('C%d: %5.2f%%  ',my_clu_mean,Ccompare_p(gt_mean,my_clu_mean));
     end
@@ -141,7 +143,7 @@ fprintf('\n');
 Cluster_error = length(CErrorIdx); % All False Positive
 
 %fprintf('\tFalse Detected Cluster # = %d\n', numFC);
-fprintf('\tCluster True Ratio\t- [TP/ALL]: %5.2f%% (%d/%d)\n', 100*sum(cluster_TP)/Ndetected, sum(cluster_TP), Ndetected);
+fprintf('\tCluster Accuracy\t- [TP/P]: %5.2f%% (%d/%d)\n', 100*sum(cluster_TP)/Ndetected, sum(cluster_TP), Ndetected);
 fprintf('\tCluster mean ROC\t- [TPR]:%5.2f [TNR]:%5.2f\n', mean(TPR), mean(TNR));
 
 evaluation_out = Ccompare_p;

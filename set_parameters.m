@@ -39,7 +39,7 @@ feature_opt.spike_length    = detect_opt.spike_length;
 % cluster
 cluster_opt.Ncluster        =   8; %opt.NgtClu+1; % 0 : set automatically
 cluster_opt.feature_weight  =   1;		
-cluster_opt.channel_weight  =   bitshift(1,8);% bitshift(1,10) = %1024
+cluster_opt.channel_weight  =   bitshift(1,9);% bitshift(1,10) = %1024
 
 %evaluation
 evaluation_opt.Ncluster     =   cluster_opt.Ncluster;
