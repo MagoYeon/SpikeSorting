@@ -21,8 +21,8 @@ detect_opt.Thr              =   700;
 detect_opt.Thr_a            =   12;
 detect_opt.reverse          =   1;
 detect_opt.spike_length     =   opt.spike_length;
-detect_opt.align_idx        =   15; 
-detect_opt.overlap_range    =   5; % 0 for default : spike_length/2
+detect_opt.align_idx        =   10; %15; 
+detect_opt.overlap_range    =   0; %5; % 0 for default : spike_length/2
 detect_opt.detect_method    =   'cnvx';  
 detect_opt.avg_range        =   32; % 8, 16, 32
 % 'thr'     : simple threshold
@@ -37,9 +37,11 @@ feature_opt.sum_idx         = detect_opt.align_idx;
 feature_opt.spike_length    = detect_opt.spike_length;
 
 % cluster
-cluster_opt.Ncluster        =   8; %opt.NgtClu+1; % 0 : set automatically
+cluster_opt.Ncluster        =   7; %opt.NgtClu+1; % 0 : set automatically
 cluster_opt.feature_weight  =   1;		
 cluster_opt.channel_weight  =   bitshift(1,9);% bitshift(1,10) = %1024
+cluster_opt.feature_w_1     =   15; % bigger
+cluster_opt.feature_w_2     =   1;
 
 %evaluation
 evaluation_opt.Ncluster     =   cluster_opt.Ncluster;
@@ -49,7 +51,7 @@ evaluation_opt.Ncluster     =   cluster_opt.Ncluster;
 
 % plot
 opt.filter_plot             =   0;
-detect_opt.do_plot          =   0;
+detect_opt.do_plot          =   1;
 feature_opt.do_plot         =   0;
 cluster_opt.do_plot         =   0;
 

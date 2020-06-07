@@ -1,4 +1,4 @@
-function [cluster_out] = clustering(in_data, channel, spike_ch, cluster_opt, opt);
+function [cluster_out] = My_clustering(in_data, channel, spike_ch, cluster_opt, opt);
 
 datDir              =   opt.datDir;
 datName             =   opt.datName;
@@ -10,12 +10,18 @@ cluster_suffix		=	opt.cluster_suffix;
 plot_ch				=	opt.plot_ch;
 NgtClu              =   opt.NgtClu;
 spike_length		=	opt.spike_length;
+Nchan				=	opt.Nchan;
 
 Ncluster            =   cluster_opt.Ncluster;
 feature_weight      =   cluster_opt.feature_weight;
 channel_weight      =   cluster_opt.channel_weight;
 do_plot             =   cluster_opt.do_plot;
+feature_w_1			=   cluster_opt.feature_w_1;
+feature_w_2			=   cluster_opt.feature_w_2;
+% for hysteresis (like shmitt trigger?)
+% feature_w_1 is bigger
 
+feature_w = feature_w_1 + feature_w_2;
 clr = lines(Ncluster);
 
 
@@ -25,11 +31,55 @@ cluster_input       =   double(cluster_input);
 fprintf('Cluster Info.\n');
 fprintf('\tNgtClu = %d\n\tNcluster = %d\n\tChannel Weight = %d\n',NgtClu, Ncluster, channel_weight);
 
-%fprintf('Time %3.0fs. Clustering Started \n', toc);
-[cluster_out K_C] = kmeans(cluster_input, Ncluster, 'Replicates', 100, 'Distance', 'cityblock');
+%[cluster_out K_C] = kmeans(cluster_input, Ncluster, 'Replicates', 100);
+cluster_out	= zeros(size(cluster_input,1),1);
+K_C_tmp		= zeros(Ncluster+1, size(cluster_input, 2));
+K_C_count1	= zeros(Ncluster+1,1);
+K_C_count2	= zeros(Ncluster+1,1);
+%K_C			= cluster_input(1:Ncluster,:);
+K_C_hbit	= logical(zeros(Ncluster,Nchan));
+init = 1;
+K_C_tmp(1:Ncluster,:)	= cluster_input(init:init+Ncluster-1,:);
+fprintf('Time %3.0fs. Clustering Started \n', toc);
 
-save([outDir, datName, cluster_suffix], 'cluster_out', '-v7.3');
-writematrix(cluster_out,[outDir, datName, cluster_suffix], 'Delimiter', 'tab');
+for i = 1:size(cluster_input, 1)
+	K_C_tmp(Ncluster+1,:)	=	cluster_input(i,:);
+	merge_out	=	c_merge(K_C_tmp, Ncluster+1, channel_weight);
+	idx1		=	merge_out(1);
+	idx2		=	merge_out(2);
+
+	K_C_tmp(idx1,1:2)			=	[(K_C_tmp(idx1,1:2)*feature_w_1+K_C_tmp(idx2,(1:2))*feature_w_2)/(feature_w)];
+	K_C_bit_tmp					=	K_C_tmp(idx1,3:end);
+	K_C_bit_diff				=	K_C_tmp(idx1,3:end) ~= K_C_tmp(idx2,3:end); % diff of 2 cluster mean
+	K_C_bit_and					=	K_C_bit_diff & K_C_hbit(idx1,:);				% and(&) diff with hysteresis_bit
+	K_C_hbit(idx1,:)			=	K_C_bit_diff;
+	K_C_bit_idx					=	find(K_C_bit_and==1);						% find idx of value 1
+	K_C_bit_tmp(K_C_bit_idx)	=	1*not(K_C_bit_tmp(K_C_bit_idx));			% flip value with above idx
+
+	K_C_tmp(idx1,3:end)			=	K_C_bit_tmp;
+	if(idx2 ~= Ncluster+2)
+		K_C_tmp(idx2)		=	K_C_tmp(Ncluster+1);
+	end
+	K_C_count1(idx1)		=	K_C_count1(idx1)+1;
+	K_C_count2(idx2)		=	K_C_count2(idx2)+1;
+end
+
+K_C	=	K_C_tmp(1:Ncluster,:);
+%K_C(1,1:2)
+K_C_count1
+K_C_count2
+
+for i = 1:size(cluster_input,1)
+	new_data		=	cluster_input(i,:);
+	c_out			=	c_merge([K_C;new_data],0,channel_weight);
+	c_idx			=	c_out(2);
+	cluster_out(i)	=	c_idx;
+end
+	
+
+	
+save([outDir, datName, '_My',cluster_suffix], 'cluster_out', '-v7.3');
+writematrix(cluster_out,[outDir, datName, '_My',cluster_suffix], 'Delimiter', 'tab');
 
 [~,K_idx] = max(K_C(:,3:end),[],2);
 [~,KA_idx] = max(max(K_C(:,3:end)));

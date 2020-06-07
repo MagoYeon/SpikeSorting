@@ -14,8 +14,8 @@ miss_detected	=	0;
 gt_idx = 1;
 my_idx = 1;
 
-fprintf('Cluster Info. \n\tNgtClu = %d\n\tNcluster = %d\n',NgtClu, Ncluster);
-fprintf('\n');
+%fprintf('Cluster Info. \n\tNgtClu = %d\n\tNcluster = %d\n',NgtClu, Ncluster);
+%fprintf('\n');
 
 while((gt_idx <= Nspike) && my_idx <= Ndetected)
 	if(gtRes(gt_idx) >= (spike_time(my_idx) - spike_length/2) && ...
@@ -43,16 +43,16 @@ detection_TN	= Ndetected_negative - detection_FN;
 TPR				= detection_TP / (detection_TP + detection_FN);
 TNR				= detection_TN / (detection_TN + detection_FP);
 
-fprintf('Detection Results :\n')
-fprintf('\t\t\tTrue\t\tFalse\n');
-fprintf('\tPositive\t%d\t\t%d\n',detection_TP, detection_FP);
-fprintf('\tNegative\t%d\t%d\n',detection_TN, detection_FN);
-fprintf('\n');
-fprintf('\tTrue Positive Rate(TPR) : %f\n', TPR);
-fprintf('\tTrue Negative Rate(TNR) : %f\n', TNR);
-fprintf('\n');
-fprintf('\tDetection Accuracy\t- [TP/P]: %5.2f%% (%d/%d)\n', 100*detection_TP/Ndetected, detection_TP, Ndetected);
-fprintf('\n');
+%fprintf('Detection Results :\n')
+%fprintf('\t\t\tTrue\t\tFalse\n');
+%fprintf('\tPositive\t%d\t\t%d\n',detection_TP, detection_FP);
+%fprintf('\tNegative\t%d\t%d\n',detection_TN, detection_FN);
+%fprintf('\n');
+%fprintf('\tTrue Positive Rate(TPR) : %f\n', TPR);
+%fprintf('\tTrue Negative Rate(TNR) : %f\n', TNR);
+%fprintf('\n');
+%fprintf('\tDetection Accuracy\t- [TP/P]: %5.2f%% (%d/%d)\n', 100*detection_TP/Ndetected, detection_TP, Ndetected);
+%fprintf('\n');
 
 %Reordered cluter output
 cluster_out_RO					=	zeros(Nspike,1);
@@ -70,13 +70,13 @@ for gt_mean = min(gtClu):max(gtClu)
     end
 end
 
-for gt_mean = min(gtClu):max(gtClu)
-    fprintf('\tgtClu:%d [%5d] =', gt_mean, length(find(gtClu==gt_mean)));
-    for my_clu_mean = 1:Ncluster
-        fprintf('C%d: %5.2f%%  ',my_clu_mean,Ccompare_p(gt_mean,my_clu_mean));
-    end
-    fprintf('\n');
-end
+%for gt_mean = min(gtClu):max(gtClu)
+%    fprintf('\tgtClu:%d [%5d] =', gt_mean, length(find(gtClu==gt_mean)));
+%    for my_clu_mean = 1:Ncluster
+%        fprintf('C%d: %5.2f%%  ',my_clu_mean,Ccompare_p(gt_mean,my_clu_mean));
+%    end
+%    fprintf('\n');
+%end
 
 Cmap = zeros(1,Ncluster);
 TCcompare = Ccompare;
@@ -92,17 +92,17 @@ end
 
 FCluster = find(Cmap==0);
 
-fprintf('\n');
-for i = 1:NgtClu
-    fprintf('\t[Label %d:gtclu %d]\n',i,Cmap(i)); %[Cluster2:Label%d]\t[CLuster3:Label%d]\n',Cmap(1),Cmap(2),Cmap(3));
-end
-if(FCluster)
-	fprintf('\t[Label %d:False Cluster]\n',FCluster);
-else
-	fprintf('\t[No False Cluster]\n');
-end
-
-fprintf('\n');
+%fprintf('\n');
+%for i = 1:NgtClu
+%    fprintf('\t[Label %d:gtclu %d]\n',i,Cmap(i)); %[Cluster2:Label%d]\t[CLuster3:Label%d]\n',Cmap(1),Cmap(2),Cmap(3));
+%end
+%if(FCluster)
+%	fprintf('\t[Label %d:False Cluster]\n',FCluster);
+%else
+%	fprintf('\t[No False Cluster]\n');
+%end
+%
+%fprintf('\n');
 
 CErrorIdx = [];
 cluster_FP = [];
@@ -130,11 +130,11 @@ for i = 1:Ncluster
 	TPR(i)			= cluster_TP(i) / (cluster_TP(i) + cluster_FN(i));
 	TNR(i)			= cluster_TN(i) / (cluster_TN(i) + cluster_FP(i));
     CErrorIdx = [CErrorIdx ; errorC{i}];
-	fprintf('\tCluster %d-[TPR]:%.2f\t[TNR]:%.2f', i, TPR(i), TNR(i));
-    fprintf('\t[TP/P]:%5.2f%% (%d/%d)\n', 100*cluster_TP(i)/cluster_P, cluster_TP(i),cluster_P);    
+	%fprintf('\tCluster %d-[TPR]:%.2f\t[TNR]:%.2f', i, TPR(i), TNR(i));
+    %fprintf('\t[TP/P]:%5.2f%% (%d/%d)\n', 100*cluster_TP(i)/cluster_P, cluster_TP(i),cluster_P);    
 end
 
-fprintf('\n');
+%fprintf('\n');
 
 
 
@@ -143,7 +143,9 @@ fprintf('\n');
 Cluster_error = length(CErrorIdx); % All False Positive
 
 %fprintf('\tFalse Detected Cluster # = %d\n', numFC);
-fprintf('\tCluster Accuracy\t- [TP/P]: %5.2f%% (%d/%d)\n', 100*sum(cluster_TP)/Ndetected, sum(cluster_TP), Ndetected);
+%fprintf('\tCluster Accuracy\t- : %f\n', (sum(cluster_TP)+sum(cluster_TN))/(sum(cluster_TP)+sum(cluster_TN)+sum(cluster_FN)+sum(cluster_FP)));
+%fprintf('\tCluster Precision\t- : %f\n', (sum(cluster_TP))/(sum(cluster_TP)+sum(cluster_FP)));
+fprintf('\tCluster Accuracy\t- : %f\n', (sum(cluster_TP)/Ndetected));
 fprintf('\tCluster mean ROC\t- [TPR]:%5.2f [TNR]:%5.2f\n', mean(TPR), mean(TNR));
 
 evaluation_out = Ccompare_p;
