@@ -1,4 +1,4 @@
-function [cluster_out] = clustering(in_data, channel, spike_ch, cluster_opt, opt);
+function [cluster_out K_C] = clustering(in_data, channel, spike_ch, cluster_opt, opt);
 
 datDir              =   opt.datDir;
 datName             =   opt.datName;
