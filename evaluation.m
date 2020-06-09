@@ -1,4 +1,4 @@
-function [evaluation_out] = evaluation(spike_time, cluster_out, gtRes, gtClu, Nsamples, Ncluster, opt);
+function [DA CA SA] = evaluation(spike_time, cluster_out, gtRes, gtClu, Nsamples, Ncluster, opt);
 
 NgtClu      		=   opt.NgtClu;
 Nspike				=	size(gtRes,1);
@@ -145,7 +145,11 @@ Cluster_error = length(CErrorIdx); % All False Positive
 %fprintf('\tFalse Detected Cluster # = %d\n', numFC);
 %fprintf('\tCluster Accuracy\t- : %f\n', (sum(cluster_TP)+sum(cluster_TN))/(sum(cluster_TP)+sum(cluster_TN)+sum(cluster_FN)+sum(cluster_FP)));
 %fprintf('\tCluster Precision\t- : %f\n', (sum(cluster_TP))/(sum(cluster_TP)+sum(cluster_FP)));
-fprintf('\tCluster Accuracy\t- : %f\n', (sum(cluster_TP)/Ndetected));
-fprintf('\tCluster mean ROC\t- [TPR]:%5.2f [TNR]:%5.2f\n', mean(TPR), mean(TNR));
+DA = (detection_TP)/(detection_TP+detection_FP+detection_FN);
+CA = sum(cluster_TP)/Ndetected;
+SA = sum(cluster_TP)/(detection_TP+detection_FP+detection_FN);
+fprintf('\tDetection Accuracy\t- : %f\n', DA);
+fprintf('\tCluster Accuracy\t- : %f\n', CA);
+fprintf('\tSorting Accuracy\t- : %f\n', SA);
+cluster_TP;
 
-evaluation_out = Ccompare_p;
