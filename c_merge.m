@@ -1,4 +1,4 @@
-function [merge_out]    =   c_merge(in_data, K, channel_weight, mean_weight);
+function [merge_out]    =   c_merge(in_data, K, mean_weight);
 
 merge_out(3) = -1;
 data_length =   size(in_data,1);
@@ -9,15 +9,15 @@ max_dix_i2  =   0;
 
 
 if(K==0)
-    K = data_length;
+    start = data_length;
 else
-    i = 1:K;
+    start = 1;
+    mean_w      =   mean_weight*ones(K,1);
+    mean_w(K)   =   1;
 end
 
-mean_w      =   mean_weight*ones(K,1);
-mean_w(K)   =   1;
 
-for i = 1:K; 
+for i = start:data_length 
     diff            = abs(in_data-in_data(i,:));
     %diffw           = [diff(:,1:2) channel_weight*diff(:,3:end)];
     diffw           = diff;

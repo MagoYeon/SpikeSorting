@@ -70,13 +70,13 @@ for gt_mean = min(gtClu):max(gtClu)
     end
 end
 
-%for gt_mean = min(gtClu):max(gtClu)
-%    fprintf('\tgtClu:%d [%5d] =', gt_mean, length(find(gtClu==gt_mean)));
-%    for my_clu_mean = 1:Ncluster
-%        fprintf('C%d: %5.2f%%  ',my_clu_mean,Ccompare_p(gt_mean,my_clu_mean));
-%    end
-%    fprintf('\n');
-%end
+for gt_mean = min(gtClu):max(gtClu)
+    fprintf('\tgtClu:%d [%5d] =', gt_mean, length(find(gtClu==gt_mean)));
+    for my_clu_mean = 1:Ncluster
+        fprintf('C%d: %5.2f%%  ',my_clu_mean,Ccompare_p(gt_mean,my_clu_mean));
+    end
+    fprintf('\n');
+end
 
 Cmap = zeros(1,Ncluster);
 TCcompare = Ccompare;
@@ -92,17 +92,17 @@ end
 
 FCluster = find(Cmap==0);
 
-%fprintf('\n');
-%for i = 1:NgtClu
-%    fprintf('\t[Label %d:gtclu %d]\n',i,Cmap(i)); %[Cluster2:Label%d]\t[CLuster3:Label%d]\n',Cmap(1),Cmap(2),Cmap(3));
-%end
-%if(FCluster)
-%	fprintf('\t[Label %d:False Cluster]\n',FCluster);
-%else
-%	fprintf('\t[No False Cluster]\n');
-%end
-%
-%fprintf('\n');
+fprintf('\n');
+for i = 1:NgtClu
+    fprintf('\t[Label %d:gtclu %d]\n',i,Cmap(i)); %[Cluster2:Label%d]\t[CLuster3:Label%d]\n',Cmap(1),Cmap(2),Cmap(3));
+end
+if(FCluster)
+	fprintf('\t[Label %d:False Cluster]\n',FCluster);
+else
+	fprintf('\t[No False Cluster]\n');
+end
+
+fprintf('\n');
 
 CErrorIdx = [];
 cluster_FP = [];
@@ -130,11 +130,11 @@ for i = 1:Ncluster
 	TPR(i)			= cluster_TP(i) / (cluster_TP(i) + cluster_FN(i));
 	TNR(i)			= cluster_TN(i) / (cluster_TN(i) + cluster_FP(i));
     CErrorIdx = [CErrorIdx ; errorC{i}];
-	%fprintf('\tCluster %d-[TPR]:%.2f\t[TNR]:%.2f', i, TPR(i), TNR(i));
-    %fprintf('\t[TP/P]:%5.2f%% (%d/%d)\n', 100*cluster_TP(i)/cluster_P, cluster_TP(i),cluster_P);    
+	fprintf('\tCluster %d-[TPR]:%.2f\t[TNR]:%.2f', i, TPR(i), TNR(i));
+    fprintf('\t[TP/P]:%5.2f%% (%d/%d)\n', 100*cluster_TP(i)/cluster_P, cluster_TP(i),cluster_P);    
 end
 
-%fprintf('\n');
+fprintf('\n');
 
 
 
