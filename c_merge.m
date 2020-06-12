@@ -10,9 +10,10 @@ max_dix_i2  =   0;
 
 if(K==0)
     start = data_length;
+    mean_w      =   ones(data_length,1);
 else
     start = 1;
-    mean_w      =   mean_weight*ones(K,1);
+    mean_w      =   mean_weight*ones(data_length,1);
     mean_w(K)   =   1;
 end
 
@@ -21,7 +22,8 @@ for i = start:data_length
     diff            = abs(in_data-in_data(i,:));
     %diffw           = [diff(:,1:2) channel_weight*diff(:,3:end)];
     diffw           = diff;
-    d_sum           = sum(diffw,2); %.*mean_w;
+    %d_sum           = sum(diffw,2); %.*mean_w;
+    d_sum           = sum(diffw,2).*mean_w;
     [max_v max_i]   = max(d_sum);
 
     if(max_dis_v < max_v)

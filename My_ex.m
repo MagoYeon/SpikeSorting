@@ -129,7 +129,7 @@ end
     feature_out =   feature_extraction(detection_out, feature_opt, opt, Nchan);
 
 % Cluster
-    [cluster_out K_C]=   My_clustering(feature_out, detection_out.channel, detection_out.spike_ch, cluster_opt, opt);
+    [cluster_out K_C]=   My_clustering2(feature_out, detection_out.channel, detection_out.spike_ch, cluster_opt, opt);
 
 % Evaluation
     evaluation_out  =   evaluation(detection_out.spike_time, cluster_out, gtRes, gtClu(2:end), Nsamples, cluster_opt.Ncluster, opt);

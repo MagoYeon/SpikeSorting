@@ -47,7 +47,7 @@ fprintf('\tNgtClu = %d\n\tNcluster = %d\n\tChannel Weight = %d\n',NgtClu, Nclust
 ch_label_tmp= zeros(Ncluster,Nchan);
 ch_label	= zeros(Ncluster,Nchan);
 %ch_m_range	= ones(Ncluster,1);
-ch_m_range	= 1;
+ch_m_range	= 2;
 ch_cnt		= 0;
 k = 0;
 
@@ -55,14 +55,14 @@ cnt_thr = 8;
 label_cnt = 1;
 spike_p_sec = 7;
 
-start = 500;
+start = 1;
 
 
 %ii = start:start-1+spike_p_sec*10;
 ii = 1:Ndetected;
 
 % ch_label 
-%while label_cnt <= Ncluster % just for test
+while label_cnt <= Ncluster % just for test
 	for i = ii % 10 sec = 8 thr
 		ch_diff_tmp		= abs(ch_label_tmp - channel(i,:));
 		ch_diff_tmp		= sum(ch_diff_tmp,2);
@@ -85,9 +85,9 @@ ii = 1:Ndetected;
 		end
 	end
 
-	k
-	figure;
-	stem(1:k,ch_cnt);
+	%k
+	%figure;
+	%stem(1:k,ch_cnt);
 
 	% find ch_cnt > thr
 	ch_idx = find(ch_cnt >=cnt_thr);
@@ -99,8 +99,19 @@ ii = 1:Ndetected;
 	k = 0;
 
 	ii = ii + spike_p_sec*10;
-%end
+end
 
+
+
+%fprintf('\tCh Count Thre : %d\n',ch_cnt_thr);
+fprintf('\tCh Label : \n');
+for i = 1:Ncluster
+	fprintf('\t%d : range=%d\t',i,ch_m_range);
+	fprintf('%d ',find(ch_label(i,:)==1));
+	%fprintf('(%d)', ch_cnt(ch_pick_idx(i)));
+	fprintf('\n');
+end
+	
 % train with only labelled channel
 
 % init K_C
@@ -115,17 +126,24 @@ while k < Ncluster
 	label_idx		= find(ch_diff <= ch_m_range,1);
 	if(label_idx)
 		k = k+1;
-		K_C_tmp(k,:) = [in_data(i,:)	channel_weight*double(channel(i,:))];
+		K_C_tmp(k,:) = [in_data(i,:)	double(channel(i,:))];
 	end
+end
+fprintf('\tCh Label : \n');
+for i = 1:Ncluster
+	fprintf('\t%d : range=%d\t',i,ch_m_range);
+	fprintf('[%d %d]\t', K_C_tmp(i,1:2));
+	fprintf('%d ',find(K_C_tmp(i,3:end)==1));
+	fprintf('\n');
 end
 		
 for i = 1:Ndetected
 	%[Li_ch Loc_label]	= ismember(channel(i,:),ch_label,'rows');
 	%if(Li_ch)
-	ch_diff			= abs(ch_label - channel(i,:));
-	ch_diff 		= sum(ch_diff,2);
-	label_idx		= find(ch_diff <= ch_m_range,1);
-	if(label_idx)
+%	ch_diff			= abs(ch_label - channel(i,:));
+%	ch_diff 		= sum(ch_diff,2);
+%	label_idx		= find(ch_diff <= ch_m_range,1);
+%	if(label_idx)
 		K_C_tmp(Ncluster+1,:) = [in_data(i,:)	channel_weight*double(channel(i,:))];
 
 		%merge_out	=	c_merge(K_C_tmp, Ncluster+1, mean_weight);
@@ -137,7 +155,7 @@ for i = 1:Ndetected
 
 		K_C_tmp(min_idx1,:)		=	(K_C_tmp(min_idx1,:)*feature_w_1+K_C_tmp(Ncluster+1,:)*feature_w_2)/(feature_w);
 		%K_C_tmp(min_idx2,:)		=	[in_data(i,:)	channel_weight*double(channel(i,:))];
-	end
+%	end
 end
 
 K_C	= zeros(size(K_C_tmp) - [1 0]);
@@ -315,6 +333,7 @@ writematrix(cluster_out,[outDir, datName, '_My',cluster_suffix], 'Delimiter', 't
 %%plot(1:i,min_v)
 %
 
+do_plot = 1;
 if(do_plot)
     fprintf('Time %3.0fs. Plotting Cluster Started \n', toc);
     figure();

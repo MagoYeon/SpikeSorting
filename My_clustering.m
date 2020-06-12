@@ -55,9 +55,11 @@ max_v(1)		=	0;
 K_C_tmp(1,:)	=	cluster_input(1,:);
 k = 1;
 
-for i = 2:size(cluster_input, 1)
-	K_C_tmp(j+1,:)	=	cluster_input(i,:);
-	merge_out	=	c_merge(K_C_tmp(1:j+1,:), j+1, channel_weight, mean_weight);
+K_C_tmp(1:Ncluster,:) = cluster_input(1:Ncluster,:);
+
+for i = Ncluster+1:size(cluster_input, 1)
+	K_C_tmp(Ncluster+1,:)	=	cluster_input(i,:);
+	merge_out	=	c_merge(K_C_tmp(1:j+1,:), j+1, mean_weight);
 	min_idx1	=	merge_out(1);
 	min_idx2	=	merge_out(2);
 	min_v(i)	=	merge_out(3);
@@ -65,23 +67,24 @@ for i = 2:size(cluster_input, 1)
 	max_idx2	=	merge_out(5);
 	max_v(i)	=	merge_out(6);
 
-	if(min_v(i) < min_dis_thr)	% merge
-		K_C_tmp(min_idx1,:)		=	(K_C_tmp(min_idx1,:)*feature_w_1+K_C_tmp(min_idx2,:)*feature_w_2)/(feature_w);
-		K_C_merge_cnt			=	K_C_merge_cnt + 1;
-		K_C_count1(min_idx1)	=	K_C_count1(min_idx1) + 1;
-	else
-		if(j ~= Ncluster)	% new mean
-			j = j + 1;
-			K_C_tmp(j,:)			=	cluster_input(i,:);
-			K_C_new_cnt				=	K_C_new_cnt + 1;
-		else
-			K_C_tmp(max_idx2,:)		=	cluster_input(i,:);
-			K_C_ex_cnt				=	K_C_ex_cnt + 1;
-			K_C_ex_v(k)				=	max_v(i);
-			k						=	k+1;
-			K_C_count2(max_idx2)	=	K_C_count1(max_idx2) + 1;
-		end
-	end
+	%if(min_v(i) < min_dis_thr)	% merge
+    K_C_tmp(min_idx1,:)		=	(K_C_tmp(min_idx1,:)*feature_w_1+K_C_tmp(min_idx2,:)*feature_w_2)/(feature_w);
+    K_C_merge_cnt			=	K_C_merge_cnt + 1;
+    K_C_count1(min_idx1)	=	K_C_count1(min_idx1) + 1;
+    K_C_tmp(max_idx2,:)		=	cluster_input(i,:);
+	%else
+	%	if(j ~= Ncluster)	% new mean
+	%		j = j + 1;
+	%		K_C_tmp(j,:)			=	cluster_input(i,:);
+	%		K_C_new_cnt				=	K_C_new_cnt + 1;
+	%	else
+	%		K_C_tmp(max_idx2,:)		=	cluster_input(i,:);
+	%		K_C_ex_cnt				=	K_C_ex_cnt + 1;
+	%		K_C_ex_v(k)				=	max_v(i);
+	%		k						=	k+1;
+	%		K_C_count2(max_idx2)	=	K_C_count1(max_idx2) + 1;
+	%	end
+	%end
 
 
 %	if(max_dis(i)>=	max_dis_thr);
@@ -113,17 +116,17 @@ end
 
 K_C	=	K_C_tmp(1:Ncluster,:);
 %K_C(1,1:2)
-K_C_count1
-K_C_count2
+%K_C_count1
+%K_C_count2
 %max(max_dis)
 
-K_C_merge_cnt
-K_C_new_cnt
-K_C_ex_cnt
+%K_C_merge_cnt
+%K_C_new_cnt
+%K_C_ex_cnt
 
 for i = 1:size(cluster_input,1)
 	new_data		=	cluster_input(i,:);
-	c_out			=	c_merge([K_C;new_data],0,channel_weight,1);
+	c_out			=	c_merge([K_C;new_data],0,1);
 	c_idx			=	c_out(2);
 	cluster_out(i)	=	c_idx;
 end
@@ -144,14 +147,14 @@ K_idx = K_idx - 2;	% this index is not precise. It's just for estimation.
 %	plot(X,K_C_diff(i,:));
 %end
 %hold off
-figure;
-X = 1:k-1;
-plot(X,K_C_ex_v);
-%plot_ch = 112;
-plot_ch = KA_idx;
-
-figure;
-plot(1:i,min_v)
+%figure;
+%X = 1:k-1;
+%plot(X,K_C_ex_v);
+%%plot_ch = 112;
+%plot_ch = KA_idx;
+%
+%figure;
+%plot(1:i,min_v)
 
 
 if(do_plot)

@@ -81,7 +81,8 @@ end
 Cmap = zeros(1,Ncluster);
 TCcompare = Ccompare;
 for i = 1:NgtClu
-    [r, c] = find(TCcompare==max(max(TCcompare)));
+    %find(TCcompare==max(max(TCcompare)))
+    [r, c] = find(TCcompare==max(max(TCcompare)),1);
     Cmap(c) = r; %mapping cluster 
     %index c = cluster result
     %value r = gtClu index
@@ -89,6 +90,7 @@ for i = 1:NgtClu
     TCcompare(:,c) = 0;
 end
 %Camp(4)
+Cmap
 
 FCluster = find(Cmap==0);
 
