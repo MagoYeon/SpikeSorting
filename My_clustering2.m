@@ -25,6 +25,8 @@ min_dis_thr			=	cluster_opt.min_dis_thr;
 % for hysteresis (like shmitt trigger?)
 % feature_w_1 is bigger
 
+channel				=	double(channel);
+
 Ndetected			=	size(in_data,1);
 
 feature_w = feature_w_1 + feature_w_2;
@@ -42,8 +44,10 @@ fprintf('\tNgtClu = %d\n\tNcluster = %d\n\tChannel Weight = %d\n',NgtClu, Nclust
 %fprintf('Time %3.0fs. Clustering Started \n', toc);
 
 % all channel ditribution
-ch_label_tmp= zeros(1,Nchan);
-ch_label	= zeros(1,Nchan);
+ch_label_tmp= zeros(Ncluster,Nchan);
+ch_label	= zeros(Ncluster,Nchan);
+%ch_m_range	= ones(Ncluster,1);
+ch_m_range	= 1;
 ch_cnt		= 0;
 k = 0;
 
@@ -51,17 +55,28 @@ cnt_thr = 8;
 label_cnt = 1;
 spike_p_sec = 7;
 
+start = 500;
 
-ii = 1:spike_p_sec*10;
+
+%ii = start:start-1+spike_p_sec*10;
+ii = 1:Ndetected;
 
 % ch_label 
-while label_cnt <= Ncluster % just for test
+%while label_cnt <= Ncluster % just for test
 	for i = ii % 10 sec = 8 thr
-		[Li_ch Loc_label]			= ismember(channel(i,:),ch_label,'rows');
-		[Li_ch_tmp Loc_label_tmp]	= ismember(channel(i,:),ch_label_tmp,'rows');
-		if(~Li_ch)
-			if(Li_ch_tmp)
-				ch_cnt(Loc_label_tmp)	= ch_cnt(Loc_label_tmp) + 1;
+		ch_diff_tmp		= abs(ch_label_tmp - channel(i,:));
+		ch_diff_tmp		= sum(ch_diff_tmp,2);
+		label_idx_tmp	= find(ch_diff_tmp <= ch_m_range,1);
+
+		ch_diff			= abs(ch_label - channel(i,:));
+		ch_diff 		= sum(ch_diff,2);
+		label_idx		= find(ch_diff <= ch_m_range,1);
+
+%		[Li_ch Loc_label]			= ismember(channel(i,:),ch_label,'rows');
+%		[Li_ch_tmp Loc_label_tmp]	= ismember(channel(i,:),ch_label_tmp,'rows');
+		if(isempty(label_idx))
+			if(label_idx_tmp)
+				ch_cnt(label_idx_tmp)	= ch_cnt(label_idx_tmp) + 1;
 			else
 				k						= k + 1;
 				ch_label_tmp(k,:)		= channel(i,:);
@@ -70,9 +85,9 @@ while label_cnt <= Ncluster % just for test
 		end
 	end
 
-	%k
-	%figure;
-	%stem(1:k,ch_cnt);
+	k
+	figure;
+	stem(1:k,ch_cnt);
 
 	% find ch_cnt > thr
 	ch_idx = find(ch_cnt >=cnt_thr);
@@ -84,25 +99,33 @@ while label_cnt <= Ncluster % just for test
 	k = 0;
 
 	ii = ii + spike_p_sec*10;
-end
+%end
 
 % train with only labelled channel
 
 % init K_C
 i = 0;
 k = 0;
+
 while k < Ncluster
 	i = i+1;
-	[Li_ch Loc_label]	= ismember(channel(i,:),ch_label,'rows');
-	if(Li_ch)
+	%[Li_ch Loc_label]	= ismember(channel(i,:),ch_label,'rows');
+	ch_diff			= abs(ch_label - channel(i,:));
+	ch_diff 		= sum(ch_diff,2);
+	label_idx		= find(ch_diff <= ch_m_range,1);
+	if(label_idx)
 		k = k+1;
 		K_C_tmp(k,:) = [in_data(i,:)	channel_weight*double(channel(i,:))];
 	end
 end
 		
 for i = 1:Ndetected
-	[Li_ch Loc_label]	= ismember(channel(i,:),ch_label,'rows');
-	if(Li_ch)
+	%[Li_ch Loc_label]	= ismember(channel(i,:),ch_label,'rows');
+	%if(Li_ch)
+	ch_diff			= abs(ch_label - channel(i,:));
+	ch_diff 		= sum(ch_diff,2);
+	label_idx		= find(ch_diff <= ch_m_range,1);
+	if(label_idx)
 		K_C_tmp(Ncluster+1,:) = [in_data(i,:)	channel_weight*double(channel(i,:))];
 
 		%merge_out	=	c_merge(K_C_tmp, Ncluster+1, mean_weight);
