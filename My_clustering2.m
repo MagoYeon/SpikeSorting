@@ -17,21 +17,20 @@ Ncluster            =   cluster_opt.Ncluster;
 feature_weight      =   cluster_opt.feature_weight;
 channel_weight      =   cluster_opt.channel_weight;
 do_plot             =   cluster_opt.do_plot;
-feature_w_1			=   cluster_opt.feature_w_1;
-feature_w_2			=   cluster_opt.feature_w_2;
+merge_weight		=   cluster_opt.merge_weight;
 mean_weight			=   cluster_opt.mean_weight;
 max_dis_thr			=	cluster_opt.max_dis_thr;
 min_dis_thr			=	cluster_opt.min_dis_thr;
+ch_m_range			=	cluster_opt.ch_m_range;
+spike_p_sec			=	cluster_opt.spike_p_sec;
+cnt_thr				=	cluster_opt.cnt_thr;
+
 % for hysteresis (like shmitt trigger?)
 % feature_w_1 is bigger
 
 channel				=	double(channel);
-
 Ndetected			=	size(in_data,1);
-
-feature_w = feature_w_1 + feature_w_2;
 clr = lines(Ncluster);
-
 
 cluster_input       =   [(in_data*feature_weight), channel_weight*(double(channel))];
 cluster_input       =   double(cluster_input);
@@ -47,13 +46,11 @@ fprintf('\tNgtClu = %d\n\tNcluster = %d\n\tChannel Weight = %d\n',NgtClu, Nclust
 ch_label_tmp= zeros(Ncluster,Nchan);
 ch_label	= zeros(Ncluster,Nchan);
 %ch_m_range	= ones(Ncluster,1);
-ch_m_range	= 2;
 ch_cnt		= 0;
 k = 0;
 
-cnt_thr = 8;
 label_cnt = 1;
-spike_p_sec = 7;
+
 
 start = 1;
 
@@ -100,8 +97,6 @@ while label_cnt <= Ncluster % just for test
 
 	ii = ii + spike_p_sec*10;
 end
-
-
 
 %fprintf('\tCh Count Thre : %d\n',ch_cnt_thr);
 fprintf('\tCh Label : \n');
@@ -153,7 +148,7 @@ for i = 1:Ndetected
 		min_idx1	=	merge_out(2);
 		min_v(i)	=	merge_out(3);
 
-		K_C_tmp(min_idx1,:)		=	(K_C_tmp(min_idx1,:)*feature_w_1+K_C_tmp(Ncluster+1,:)*feature_w_2)/(feature_w);
+		K_C_tmp(min_idx1,:)		=	(K_C_tmp(min_idx1,:)*(merge_weight-1)+K_C_tmp(Ncluster+1,:))/(merge_weight);
 		%K_C_tmp(min_idx2,:)		=	[in_data(i,:)	channel_weight*double(channel(i,:))];
 %	end
 end
@@ -170,7 +165,7 @@ K_C	= K_C_tmp(1:Ncluster,:);
 %hold off
 
 cluster_out = zeros(2,1);
-		
+
 for i = 1:size(cluster_input,1)
 	new_data		=	cluster_input(i,:);
 	c_out			=	c_merge([K_C;new_data],0,1);
@@ -310,10 +305,10 @@ writematrix(cluster_out,[outDir, datName, '_My',cluster_suffix], 'Delimiter', 't
 %save([outDir, datName, '_My',cluster_suffix], 'cluster_out', '-v7.3');
 %writematrix(cluster_out,[outDir, datName, '_My',cluster_suffix], 'Delimiter', 'tab');
 %
-%[~,K_idx] = max(K_C(:,3:end),[],2);
-%[~,KA_idx] = max(max(K_C(:,3:end)));
-%
-%K_idx = K_idx - 2;	% this index is not precise. It's just for estimation.
+[~,K_idx] = max(K_C(:,3:end),[],2);
+[~,KA_idx] = max(max(K_C(:,3:end)));
+
+K_idx = K_idx - 2;	% this index is not precise. It's just for estimation.
 %
 %%figure();
 %%X = 1:size(cluster_out,1);
@@ -348,24 +343,24 @@ if(do_plot)
 
     fig_clu = figure('Name','Clusters - every features w/ spike channel (3D)','NumberTitle','off');
     p = uipanel('Parent',fig_clu,'BorderType','none'); 
-    ax1 = subplot(1,1,1,'Parent',p);
+    ax1 = subplot(1,2,1,'Parent',p);
 	hold on
-	%scatter3(K_C(:,1),K_C(:,2),K_idx, 80, 'k', 'Marker','x', 'LineWidth',10);
+	scatter3(K_C(:,1),K_C(:,2),K_idx, 80, 'k', 'Marker','x', 'LineWidth',10);
 	scatter3(cluster_input(:,1),cluster_input(:,2),spike_ch, 30, clr(cluster_out,:), 'Marker','.');
 	hold off
-    view(3), axis vis3d, box on, rotate3d on
+    view(3), box on, rotate3d on
     xlabel('feature 1'), ylabel('feature 2'), zlabel('channel')
 	title('3D Feature Plot : Cluster mean only');
-    %ax2 = subplot(1,2,2,'Parent',p);
-	%hold on
-	%scatter3(K_C(:,1),K_C(:,2),K_idx, 80, 'k', 'Marker','x', 'LineWidth',10);
-	%hold off
-    %view(3), axis vis3d, box on, rotate3d on
-    %xlabel('feature 1'), ylabel('feature 2'), zlabel('channel')
-	%title('3D Feature Plot w/ spike channel (Black: Cluster mean)');
-	%Link = linkprop([ax1 ax2],{'CameraUpVector', 'CameraPosition', ...
-	%	'CameraTarget', 'XLim', 'YLim', 'ZLim'});
-	%setappdata(gcf, 'StoreTheLink', Link);
+    ax2 = subplot(1,2,2,'Parent',p);
+	hold on
+	scatter3(K_C(:,1),K_C(:,2),K_idx, 80, 'k', 'Marker','x', 'LineWidth',10);
+	hold off
+    view(3), box on, rotate3d on
+    xlabel('feature 1'), ylabel('feature 2'), zlabel('channel')
+	title('3D Feature Plot w/ spike channel (Black: Cluster mean)');
+	Link = linkprop([ax1 ax2],{'CameraUpVector', 'CameraPosition', ...
+		'CameraTarget', 'XLim', 'YLim', 'ZLim'});
+	setappdata(gcf, 'StoreTheLink', Link);
 	fprintf('Time %3.0fs. Plotting Cluster Finished \n', toc);
 end
 
