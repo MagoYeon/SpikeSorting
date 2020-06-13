@@ -35,7 +35,7 @@ align_amp	= strcmp(align_opt , 'amp');
 align_det	= strcmp(align_opt , 'det');
 align_slope	= strcmp(align_opt , 'slope');
 
-fprintf('Time %3.0fs. Spike Detection Started \n', toc);
+fprintf('Time %3.0fs. Spike Detection(dvt) Started \n', toc);
 % reverse = 0;
 %if(reverse) its reversed already
 %    fprintf('Time %3.0fs. Reversing data...\n', toc);

@@ -22,16 +22,21 @@ detect_opt.Thr_a            =   12;
 detect_opt.reverse          =   1;
 detect_opt.spike_length     =   opt.spike_length;
 detect_opt.align_idx        =   10; %15; 
-detect_opt.overlap_range    =   0; %5; % 0 for default : spike_length/2
+detect_opt.halt_range       =   10; 
+    % 0 for default : spike_length/2
+    % detector halt time to avoid multiple detection of same spike
+detect_opt.overlap_range    =   0; 
+    % 0 for default : spike_length/2 
+    % spikes within this range are assumed to be overlapped spike
 detect_opt.detect_method    =   'NEO';  
-% 'thr'     : simple threshold
-% 'dvt'    : Convex threshold
-% 'neo'     : NEO
+    % 'thr'     : simple threshold
+    % 'dvt'    : Convex threshold
+    % 'NEO'     : NEO
 detect_opt.avg_range        =   32; % 8, 16, 32
 detect_opt.align_opt        =   'det';  
-% 'det'     : detected point itself
-% 'slope'   : max slope
-% 'amp'     : max amp
+    % 'det'     : detected point itself
+    % 'slope'   : max slope
+    % 'amp'     : max amp
 detect_opt.NEO_C            =   8; % many researches set C = 8 (empirically)
 detect_opt.NEO_N            =   opt.spike_length; 
 opt.detected_suffix         =   ['_detected_' detect_opt.detect_method];
@@ -60,7 +65,7 @@ evaluation_opt.Ncluster     =   cluster_opt.Ncluster;
 
 % plot
 opt.filter_plot             =   0;
-detect_opt.do_plot          =   1;
+detect_opt.do_plot          =   0;
 feature_opt.do_plot         =   0;
 cluster_opt.do_plot         =   0;
 

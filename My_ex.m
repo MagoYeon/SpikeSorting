@@ -118,18 +118,18 @@ end
 
 % Detection
 
-detection_method	= detection_opt.detection_method;
-dvt	                = strcmp(detection_method , 'dvt');
-NEO	                = strcmp(detection_method , 'NEO');
+detect_method	= detect_opt.detect_method;
+dvt	                = strcmp(detect_method , 'dvt');
+NEO	                = strcmp(detect_method , 'NEO');
 
 if ~exist([outDir, datName, detected_suffix, '.mat'])
     if(dvt)
         detection_out = spike_det_dvt2(filtered_data, detect_opt, opt);
-    elseif(NEO
+    elseif(NEO)
         detection_out = spike_det_NEO(filtered_data, detect_opt, opt);
     end
 else
-	fprintf('Detected Spikeds Exists\n');
+	fprintf(['Detected Spikes(',detect_method,')Exists\n']);
     fprintf('Time %3.0fs. Loading Detected Spikes Started \n', toc);
     detection_out = load([outDir, datName,detected_suffix, '.mat']).detection_out;
 	fprintf('Time %3.0fs. Loading Detected Spikes Finished \n', toc);
