@@ -1,9 +1,17 @@
-function [detection_out] = spike_detection(in_data, plot_ch, outDir, datName, detect_opt);
+function [detection_out] = spike_detection(in_data, detect_opt, opt);
 
 
 
 Nchan = size(in_data, 1);
-Nsamples = size(in_data, 2);
+%Nsamples = size(in_data, 2);
+Nsamples = (ceil(size(in_data, 2)) * 0.001);
+
+datDir              =   opt.datDir;
+datName             =   opt.datName;
+outDir              =   opt.outDir;
+threshold_suffix    =   opt.threshold_suffix;
+detected_suffix		=	opt.detected_suffix;
+plot_ch				=	opt.plot_ch;
 
 Thr				=   detect_opt.Thr;
 reverse			=   detect_opt.reverse;
@@ -132,9 +140,9 @@ fprintf('\nTime %3.0fs. Spike Detection Finished \n', toc);
 fprintf('# of spikes : %d\n',k);
 fprintf('# of overlap : %d\n',overlap_num);
 
-fprintf('Time %3.0fs. Saving Detected Spikes Started \n', toc);
-save([outDir, datName, '_detected'], 'detection_out', '-v7.3');
-fprintf('Time %3.0fs. Saving Detected Spikes Finished \n', toc);
+%fprintf('Time %3.0fs. Saving Detected Spikes Started \n', toc);
+%save([outDir, datName, '_detected'], 'detection_out', '-v7.3');
+%fprintf('Time %3.0fs. Saving Detected Spikes Finished \n', toc);
 
 if (detect_opt.do_plot)
     fprintf('Time %3.0fs. Plotting Detected Spike Started \n', toc);

@@ -55,6 +55,11 @@ else
     Nsamples = size(filtered_data, 2);
 end
 
+if(opt.reverse)
+    fprintf('Time %3.0fs. Reversing data...\n', toc);
+    filtered_data = -1*filtered_data;
+end
+
 
 gtResFlatten = zeros(1, Nsamples);
 for idx = 1:length(gtRes)
@@ -113,8 +118,16 @@ end
 
 % Detection
 
+detection_method	= detection_opt.detection_method;
+dvt	                = strcmp(detection_method , 'dvt');
+NEO	                = strcmp(detection_method , 'NEO');
+
 if ~exist([outDir, datName, detected_suffix, '.mat'])
-    detection_out = spike_det_dvt2(filtered_data, detect_opt, opt);
+    if(dvt)
+        detection_out = spike_det_dvt2(filtered_data, detect_opt, opt);
+    elseif(NEO
+        detection_out = spike_det_NEO(filtered_data, detect_opt, opt);
+    end
 else
 	fprintf('Detected Spikeds Exists\n');
     fprintf('Time %3.0fs. Loading Detected Spikes Started \n', toc);

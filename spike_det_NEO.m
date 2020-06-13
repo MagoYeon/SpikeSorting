@@ -1,4 +1,4 @@
-function [detection_out] = spike_det_dvt2(in_data, detect_opt, opt);
+function [detection_out] = spike_det_NEO(in_data, detect_opt, opt);
 
 
 
@@ -25,6 +25,8 @@ align_idx		=   detect_opt.align_idx;
 align_opt		=	detect_opt.align_opt;
 detect_method	=	detect_opt.detect_method;
 overlap_range   =   detect_opt.overlap_range;	% 1~2
+NEO_C			=	detect_opt.NEO_C;
+NEO_N			=	detect_opt.NEO_N;
 
 plot_ch			=	1;
 %plot_ch			=	98;
@@ -37,7 +39,7 @@ align_slope	= strcmp(align_opt , 'slope');
 
 fprintf('Time %3.0fs. Spike Detection Started \n', toc);
 % reverse = 0;
-%if(reverse) its reversed already
+%if(reverse)
 %    fprintf('Time %3.0fs. Reversing data...\n', toc);
 %    data = -1*in_data;
 %else
@@ -47,6 +49,20 @@ fprintf('Time %3.0fs. Spike Detection Started \n', toc);
 if(overlap_range == 0)
     overlap_range = floor(spike_length/2);
 end
+
+fprintf('Time %3.0fs. NEO filtering data...\n', toc);
+for i = 2:(Nsamples-1)
+	NEO_data(:,i)	=	in_data(:,i)*in_data(:,i)-in_data(:,i+1)*in_data(:,i-1);
+end
+NEO_data(:,1)			=	NEO_data(:,2);
+NEO_data(:,Nsamples)	=	NEO_data(:,end);
+
+fprintf('Time %3.0fs. Compute Threshold for Plot...\n', toc);
+for i = NEO_N:Nsamples
+	Thr(:,i)	=	(NEO_C)*mean(NEO_data(:,(i-NEO_N+1):i));
+end
+Thr(:,1:(NEO_N-1))	=	Thr(:,NEO_N);
+
 
 k = 0;
 i = 2;
@@ -58,51 +74,16 @@ detected_ch = zeros(1,1,'uint8');
 detected = 0;
 detected_tmp = 0;
 overlap_num = 0;
-peak = 10000*ones(average_range);	%significant initial value to avoid initial detection error
-peak_idx = 0;
-peak_num = 0;
-Thr = Thr_a*10000*ones(Nchan,1);
+%peak = 10000*ones(average_range);	%significant initial value to avoid initial detection error
+%peak_idx = 0;
+%peak_num = 0;
+
+%Thr = Thr_a*10000*ones(Nchan,1);
 Tmp_plot_idx = zeros(1,Nsamples);
 Tmp_plot_k = zeros(1,Nsamples);
 Tmp_plot_num = 0;
 Tmp_plot_ch = plot_ch;
 
-% since it takes short time, no need to load it.
-%if ~exist([outDir, datName, threshold_suffix,'.mat'])
-    fprintf('Time %3.0fs. Threshold Processing Started \n', toc);
-    for peak_j = 1:Nchan
-		peak = 10000*ones(average_range);
-		peak_num = 0;
-		%fprintf('ch %d start\n', peak_j);
-		for peak_i = 2:Nsamples-1
-            %concave = ( (data_c<data_n) && (data_c<=data_p) );
-            convex  = ( (data(peak_j,peak_i)>data(peak_j,peak_i+1)) && (data(peak_j,peak_i)>=data(peak_j,peak_i-1)) );
-            if( convex && (data(peak_j,peak_i) > 0) && (data(peak_j,peak_i) < Thr(peak_j)) ) %|| concave )
-                peak = [data(peak_j,peak_i) peak(1:average_range-1)];
-                Thr(peak_j) = mean(peak); 	
-				peak_num = peak_num + 1;
-				if(peak_num == average_range)
-					%fprintf('ch %d done\n', peak_j);
-					break;
-				end
-            end
-        end
-    end
-    fprintf('Time %3.0fs. Threshold Processing Finished \n', toc);
-
-    fprintf('Time %3.0fs. Saving Threshold Started \n', toc);
-    %save([outDir, datName, threshold_suffix, '.mat'], 'Thr', '-v7.3');
-    fprintf('Time %3.0fs. Saving Threshold Finished \n', toc);
-
-%else
-%	fprintf('Threshold Exists\n');
-%    fprintf('Time %3.0fs. Loading Threshold Started \n', toc);
-%    Thr = load([outDir, datName,threshold_suffix, '.mat']).Thr;
-%	fprintf('Time %3.0fs. Loading Threshold Finished \n', toc);
-%end
-    Thr = Thr_a * Thr;
-
-Thr(:) = 500;
         
 detect_flag = 0;
 max_amp	=	0;
@@ -119,14 +100,8 @@ while i <= Nsamples-1
         fprintf('%6.2f',(i/Nsamples)*100);
     end
 	j = 1;
-	while j <= Nchan    % this is for searching max amp spike
-		data_c  =   data(j,i);        % current data
-		data_p  =   data(j,i-1);      % previous data
-		data_n  =   data(j,i+1);      % next data
-		%concave = ( (data_c<data_n) && (data_c<=data_p) );
-		%convex  = ( (data_c>data_n) && (data_c>=data_p) );
-		convex  = ( (data(j,i)>data(j,i+1)) && (data(j,i)>=data(j,i-1)) );
-		detected = ((data(j,i) > Thr(j)) && convex);
+	while j <= Nchan	% this is for searching max amp spike
+		detected = (data(j,i) > Thr(j,i));
 		if( detected && ~detect_flag)
 			detect_flag  = 1;
 			max_amp		 = data(j,i);
@@ -196,23 +171,24 @@ while i <= Nsamples-1
 			channel(k,:) = detected_ch;
 
 			%overlap check
-			overlap_cnt = 0;
-			for overlap_idx = 2:spike_length-1
-				overlapped = ( (spike(overlap_idx-1)<spike(overlap_idx)) && ...
-								(spike(overlap_idx+1)<=spike(overlap_idx)) && ...
-								(spike(overlap_idx) > Thr(max_amp_ch)) ); %further fix required
-				if(overlapped)
-					overlap_cnt = overlap_cnt + 1;
-				end
-			end
-			if(overlap_cnt > 1)
-				overlap(k) = 1;
-				overlap_num = overlap_num + 1;
-			else
-				overlap(k) = 0;
-			end
+			%overlap_cnt = 0;
+			%for overlap_idx = 2:spike_length-1
+			%	overlapped = ( (spike(overlap_idx-1)<spike(overlap_idx)) && ...
+			%					(spike(overlap_idx+1)<=spike(overlap_idx)) && ...
+			%					(spike(overlap_idx) > Thr(max_amp_ch)) ); %further fix required
+			%	if(overlapped)
+			%		overlap_cnt = overlap_cnt + 1;
+			%	end
+			%end
+			%if(overlap_cnt > 1)
+			%	overlap(k) = 1;
+			%	overlap_num = overlap_num + 1;
+			%else
+			%	overlap(k) = 0;
+			%end
+
 			% same spike Check
-			peak_tmp = peak;
+			%peak_tmp = peak;
 			%for tmp_i = i:i+overlap_range
 			%	if(i+overlap_range > Nsamples)
 			%		break;
@@ -248,93 +224,93 @@ fprintf('Time %3.0fs. Saving Detected Spikes Finished \n', toc);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (detect_opt.do_plot)
     fprintf('Time %3.0fs. Plotting Detected Spike Started \n', toc);
-%    fig_det1 = figure('Name','Detected Signals - every channel','NumberTitle','off');
-%	X = 1:spike_length;
-%    p = uipanel('Parent',fig_det1,'BorderType','none'); 
-%	fnum = Nchan;
-%	fsize = ceil(sqrt(fnum));
-%	for i = 1:ceil(k/10) %only 10%
-%		subplot(fsize,fsize,detection_out.spike_ch(i),'Parent',p)
-%		hold on;
-%        plot(X, detection_out.spike(i,:));
-%        plot(align_idx, detection_out.spike(i,align_idx), 'ro');
-%		plot(X, Thr(detection_out.spike_ch(i))*ones(1,spike_length), 'r');
-%		hold off;
-%	end
-%	for i = 1:Nchan
-%		subplot(fsize,fsize,i,'Parent',p)
-%        title({['Ch:',num2str(i)]})
-%	end
-%	%%%pause;
-%
-%    fig_det1_1 = figure('Name','Whole Signals - every channel','NumberTitle','off');
-%	x_range = ceil(Nsamples * 0.02);
-%	X = 1:x_range;
-%    p = uipanel('Parent',fig_det1_1,'BorderType','none'); 
-%	fnum = Nchan;
-%	fsize = ceil(sqrt(fnum));
-%	for i = 1:Nchan
-%		subplot(fsize,fsize,i,'Parent',p)
-%		hold on;
-%        plot(X, data(i, 1:x_range));
-%		plot(X, Thr(detection_out.spike_ch(i))*ones(1,x_range), 'r');
-%		hold off;
-%	end
-%	for i = 1:Nchan
-%		subplot(fsize,fsize,i,'Parent',p)
-%        title({['Ch:',num2str(i)]})
-%	end
-%	%pause;
-%
-%    fig_det2 = figure('Name','Detected Signals with Threshold - overlapped','NumberTitle','off');
-%	X = 1:spike_length;
-%    p = uipanel('Parent',fig_det2,'BorderType','none'); 
-%
-%    fnum = 100;
-%    plot_num = 0;
-%
-%	%for i = 1:Tmp_plot_num
-%	for i = 1:k
-%        if(detection_out.overlap(i) == 1)
-%            plot_num = plot_num + 1;
-%            subplot(10,10,plot_num,'Parent',p)
-%	        hold on;
-%            %plot(X, detection_out(Tmp_plot_k(i)).spike);
-%            plot(X, detection_out.spike(i,:));
-%            %plot(align_idx, detection_out(Tmp_plot_k(i)).spike(align_idx), 'ro');
-%            plot(align_idx, detection_out.spike(i,align_idx), 'ro');
-%			plot(X, Thr(detection_out.spike_ch(i))*ones(1,spike_length), 'r');
-%	        hold off;
-%            %title({['spike#:',num2str(i)],['T:',num2str(detection_out(Tmp_plot_k(i)).spike_time)]})
-%            title({['spike#:',num2str(i)],['T:',num2str(detection_out.spike_time(i))]})
-%        end
-%        if(plot_num==fnum)
-%            break;
-%        end
-%	end
-%	%pause;
-%
-%    fig_det3 = figure('Name',['All Signals with Threshold - Ch: ', num2str(Tmp_plot_ch)],'NumberTitle','off');
-%    p = uipanel('Parent',fig_det3,'BorderType','none'); 
-%	X = 1:Nsamples;
-%
-%    subplot(1,1,1,'Parent',p)
-%    hold on
-%    plot(X, data(Tmp_plot_ch,1:Nsamples));
-%	plot(X, Thr(Tmp_plot_ch)*ones(1,Nsamples));
-%    for i = 1:Tmp_plot_num
-%        plot(Tmp_plot_idx(i), data(Tmp_plot_ch, Tmp_plot_idx(i)), 'ro');
-%    end
-%	%plot_time = 509859; % for ch 98
-%	%plot_time = 167963; % for ch 101
-%	%plot_time = 1618731; % for ch 1
-%	plot_time = 32;
-%    %xlim([plot_time-200 plot_time+200]);
-%    hold off
-%    
-%    fprintf('Time %3.0fs. Plotting Detected Spike Finished \n', toc);
-%	Tmp_plot_idx(1)
-%
+    fig_det1 = figure('Name','Detected Signals - every channel','NumberTitle','off');
+	X = 1:spike_length;
+    p = uipanel('Parent',fig_det1,'BorderType','none'); 
+	fnum = Nchan;
+	fsize = ceil(sqrt(fnum));
+	for i = 1:ceil(k/10) %only 10%
+		subplot(fsize,fsize,detection_out.spike_ch(i),'Parent',p)
+		hold on;
+        plot(X, detection_out.spike(i,:));
+        plot(align_idx, detection_out.spike(i,align_idx), 'ro');
+		plot(X, Thr(detection_out.spike_ch(i))*ones(1,spike_length), 'r');
+		hold off;
+	end
+	for i = 1:Nchan
+		subplot(fsize,fsize,i,'Parent',p)
+        title({['Ch:',num2str(i)]})
+	end
+	%%%pause;
+
+    fig_det1_1 = figure('Name','Whole Signals - every channel','NumberTitle','off');
+	x_range = ceil(Nsamples * 0.02);
+	X = 1:x_range;
+    p = uipanel('Parent',fig_det1_1,'BorderType','none'); 
+	fnum = Nchan;
+	fsize = ceil(sqrt(fnum));
+	for i = 1:Nchan
+		subplot(fsize,fsize,i,'Parent',p)
+		hold on;
+        plot(X, data(i, 1:x_range));
+		plot(X, Thr(detection_out.spike_ch(i))*ones(1,x_range), 'r');
+		hold off;
+	end
+	for i = 1:Nchan
+		subplot(fsize,fsize,i,'Parent',p)
+        title({['Ch:',num2str(i)]})
+	end
+	%pause;
+
+    fig_det2 = figure('Name','Detected Signals with Threshold - overlapped','NumberTitle','off');
+	X = 1:spike_length;
+    p = uipanel('Parent',fig_det2,'BorderType','none'); 
+
+    fnum = 100;
+    plot_num = 0;
+
+	%for i = 1:Tmp_plot_num
+	for i = 1:k
+        if(detection_out.overlap(i) == 1)
+            plot_num = plot_num + 1;
+            subplot(10,10,plot_num,'Parent',p)
+	        hold on;
+            %plot(X, detection_out(Tmp_plot_k(i)).spike);
+            plot(X, detection_out.spike(i,:));
+            %plot(align_idx, detection_out(Tmp_plot_k(i)).spike(align_idx), 'ro');
+            plot(align_idx, detection_out.spike(i,align_idx), 'ro');
+			plot(X, Thr(detection_out.spike_ch(i))*ones(1,spike_length), 'r');
+	        hold off;
+            %title({['spike#:',num2str(i)],['T:',num2str(detection_out(Tmp_plot_k(i)).spike_time)]})
+            title({['spike#:',num2str(i)],['T:',num2str(detection_out.spike_time(i))]})
+        end
+        if(plot_num==fnum)
+            break;
+        end
+	end
+	%pause;
+
+    fig_det3 = figure('Name',['All Signals with Threshold - Ch: ', num2str(Tmp_plot_ch)],'NumberTitle','off');
+    p = uipanel('Parent',fig_det3,'BorderType','none'); 
+	X = 1:Nsamples;
+
+    subplot(1,1,1,'Parent',p)
+    hold on
+    plot(X, data(Tmp_plot_ch,1:Nsamples));
+	plot(X, Thr(Tmp_plot_ch)*ones(1,Nsamples));
+    for i = 1:Tmp_plot_num
+        plot(Tmp_plot_idx(i), data(Tmp_plot_ch, Tmp_plot_idx(i)), 'ro');
+    end
+	%plot_time = 509859; % for ch 98
+	%plot_time = 167963; % for ch 101
+	%plot_time = 1618731; % for ch 1
+	plot_time = 32;
+    %xlim([plot_time-200 plot_time+200]);
+    hold off
+    
+    fprintf('Time %3.0fs. Plotting Detected Spike Finished \n', toc);
+	Tmp_plot_idx(1)
+
     fig_det4 = figure('Name','All Detected Signals','NumberTitle','off');
     p = uipanel('Parent',fig_det4,'BorderType','none'); 
 	X = 1:spike_length;

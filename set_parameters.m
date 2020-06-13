@@ -4,7 +4,6 @@ opt.outDir = './output/';
 opt.dat =[opt.datDir, opt.datName, '.dat'];
 
 opt.filtered_suffix     = '_filtered';
-opt.detected_suffix     = '_detected_dvt';
 opt.threshold_suffix    = '_dvt_Thr';
 opt.feature_suffix      = '_feature';
 opt.cluster_suffix      = '_cluster';
@@ -15,6 +14,7 @@ opt.Nchan		    =	129;
 opt.plot_ch         =   1;
 opt.NgtClu          =   7; % 0 : set automatically
 opt.spike_length    =   30;
+opt.reverse         =   2;
 
 % detection
 detect_opt.Thr              =   700;
@@ -23,14 +23,18 @@ detect_opt.reverse          =   1;
 detect_opt.spike_length     =   opt.spike_length;
 detect_opt.align_idx        =   10; %15; 
 detect_opt.overlap_range    =   0; %5; % 0 for default : spike_length/2
-detect_opt.detect_method    =   'cnvx';  
-detect_opt.avg_range        =   32; % 8, 16, 32
+detect_opt.detect_method    =   'NEO';  
 % 'thr'     : simple threshold
-% 'cnvx'    : Convex threshold
+% 'dvt'    : Convex threshold
+% 'neo'     : NEO
+detect_opt.avg_range        =   32; % 8, 16, 32
 detect_opt.align_opt        =   'det';  
 % 'det'     : detected point itself
 % 'slope'   : max slope
 % 'amp'     : max amp
+detect_opt.NEO_C            =   8; % many researches set C = 8 (empirically)
+detect_opt.NEO_N            =   opt.spike_length; 
+opt.detected_suffix         =   ['_detected_' detect_opt.detect_method];
 
 % feature extraction
 feature_opt.sum_idx         = detect_opt.align_idx;

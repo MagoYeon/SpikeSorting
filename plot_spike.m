@@ -35,12 +35,12 @@ else
 end
 
 
-if(reverse)
-    fprintf('Time %3.0fs. Reversing data...\n', toc);
-    data = -1*in_data;
-else
-    data = in_data;
-end
+%if(reverse)
+%    fprintf('Time %3.0fs. Reversing data...\n', toc);
+%    data = -1*in_data;
+%else
+%    data = in_data;
+%end
 
 if(overlap_range == 0)
     overlap_range = floor(spike_length/2);
