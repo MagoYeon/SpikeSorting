@@ -243,7 +243,7 @@ fprintf('\t# of spikes : %d\n',k);
 %Tmp_plot_num
 
 fprintf('Time %3.0fs. Saving Detected Spikes Started \n', toc);
-%save([outDir, datName, detected_suffix], 'detection_out', '-v7.3');
+save([outDir, datName, detected_suffix], 'detection_out', '-v7.3');
 fprintf('Time %3.0fs. Saving Detected Spikes Finished \n', toc);
 
 
