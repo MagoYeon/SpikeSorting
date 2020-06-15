@@ -41,9 +41,9 @@ detection_TP 	= Ndetected - detection_FP;
 detection_FN 	= miss_detected;
 detection_TN	= Ndetected_negative - detection_FN;
 TPR				= detection_TP / Nspike;
-TNR				= detection_TN / (Nsample-Nspike);
+TNR				= detection_TN / (Nsamples-Nspike);
 
-fprintf('Detection Results :\n')
+fprintf('Detection Results :\n');
 fprintf('\t\t\tTrue\t\tFalse\n');
 fprintf('\tPositive\t%d\t\t%d\n',detection_TP, detection_FP);
 fprintf('\tNegative\t%d\t%d\n',detection_TN, detection_FN);

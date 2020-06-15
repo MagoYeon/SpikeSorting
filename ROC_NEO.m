@@ -52,9 +52,9 @@ fprintf('Time %3.0fs. Spike Detection(NEO) Started \n', toc);
 data = in_data;
 %Thr     = zeros(Nchan,1);
 
-if(overlap_range == 0)
-    overlap_range = floor(spike_length/2);
-end
+%if(overlap_range == 0)
+%    overlap_range = floor(spike_length/2);
+%end
 
 if(halt_range == 0)
     halt_range = floor(spike_length/2);
@@ -151,7 +151,7 @@ while i <= Nsamples-1
 		j = j+1;
 	end
 
-	if( detect_flag && ( ( i - detect_time) > overlap_range) )
+	if( detect_flag && ( ( i - detect_time) >= overlap_range) )
 		detect_flag = 0;
 		detect_done = 1;
 	end
@@ -252,6 +252,7 @@ fprintf('\t# of spikes : %d\n',k);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%detect_opt.do_plot = 1;
 if (detect_opt.do_plot)
     fprintf('Time %3.0fs. Plotting Detected Spike Started \n', toc);
     %fig_det1 = figure('Name','Detected Signals - every channel','NumberTitle','off');
@@ -346,16 +347,16 @@ if (detect_opt.do_plot)
     fprintf('Time %3.0fs. Plotting Detected Spike Finished \n', toc);
 	%Tmp_plot_idx(1)
 
-    fig_det4 = figure('Name','All Detected Signals','NumberTitle','off');
-    p = uipanel('Parent',fig_det4,'BorderType','none'); 
-	X = 1:spike_length;
-    subplot(1,1,1,'Parent',p)
-    hold on
-    for i = 1:size(detection_out.spike,1)
-        %if(max(detection_out.spike(i,:)) > Thr(1))
-        plot(X, detection_out.spike(i,:));
-        %end
-    end
+    %fig_det4 = figure('Name','All Detected Signals','NumberTitle','off');
+    %p = uipanel('Parent',fig_det4,'BorderType','none'); 
+	%X = 1:spike_length;
+    %subplot(1,1,1,'Parent',p)
+    %hold on
+    %for i = 1:size(detection_out.spike,1)
+    %    %if(max(detection_out.spike(i,:)) > Thr(1))
+    %    plot(X, detection_out.spike(i,:));
+    %    %end
+    %end
     hold off
 end
 

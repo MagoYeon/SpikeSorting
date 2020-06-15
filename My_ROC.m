@@ -94,10 +94,11 @@ end
 in_data = filtered_data;
 Nspike = size(gtRes,1);
 
-roc_range = [-1*bitshift(1,10:-5:1) bitshift(1,0:12)];
+roc_range = [-1*bitshift(1,15:-5:1) bitshift(1,0:12)];
 
 k = 0;
 for i = roc_range
+    fprintf('NEO_C : %d\n', i);
 	NEO_C = i;
     k = k + 1;
 	Thr = NEO_C * NEO_Thr;
@@ -129,7 +130,7 @@ hold on
 %for i = 1:size(roc_range,2)
 %    plot(1-(TN(i)/(Nsamples -Nspike)),TP(i)/Nspike,'ro');
 %end
-plot(1-(TN/(Nsamples -Nspike)),TP/Nspike,'ro');
+plot(1-(TN/(Nsamples -Nspike)),TP/Nspike,'r--o');
 hold off
 xlabel('Probability of False Alarm')
 ylabel('Probability of Detection')
