@@ -328,7 +328,7 @@ K_idx = K_idx - 2;	% this index is not precise. It's just for estimation.
 %%plot(1:i,min_v)
 %
 
-do_plot = 1;
+%do_plot = 1;
 if(do_plot)
     fprintf('Time %3.0fs. Plotting Cluster Started \n', toc);
     figure();

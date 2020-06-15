@@ -41,7 +41,6 @@ writematrix(gtClu,[outDir, datName, '_gtClu'], 'Delimiter', 'tab');
 
 % File read
 % (+Filtering)
-
 if ~exist([outDir, datName, filtered_suffix, '.mat'])
 	[rawData Nsamples] = read_rawData(dat,Nchan);
 	filtered_data = filter_data(rawData, opt);
@@ -117,7 +116,6 @@ end
 %% 
 
 % Detection
-
 detect_method	= detect_opt.detect_method;
 dvt	                = strcmp(detect_method , 'dvt');
 NEO	                = strcmp(detect_method , 'NEO');

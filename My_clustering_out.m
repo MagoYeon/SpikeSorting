@@ -57,19 +57,23 @@ K_C_tmp(1:Ncluster,:) = cluster_input(1:Ncluster,:);
 
 for i = Ncluster+1:size(cluster_input, 1)
 	K_C_tmp(Ncluster+1,:)	=	cluster_input(i,:);
-	merge_out	=	c_merge(K_C_tmp(1:j+1,:), j+1, mean_weight);
-	min_idx1	=	merge_out(1);
-	min_idx2	=	merge_out(2);
+	%merge_out	=	c_merge(K_C_tmp(1:j+1,:), j+1, mean_weight);
+	merge_out	=	c_merge(K_C_tmp, 0, 1);
+	%min_idx1	=	merge_out(1);
+	%min_idx2	=	merge_out(2);
+	min_idx1	=	merge_out(2);
 	min_v(i)	=	merge_out(3);
 	max_idx1	=	merge_out(4);
 	max_idx2	=	merge_out(5);
 	max_v(i)	=	merge_out(6);
 
 	%if(min_v(i) < min_dis_thr)	% merge
-    K_C_tmp(min_idx1,:)		=	(K_C_tmp(min_idx1,:)*(merge_weight-1)+K_C_tmp(min_idx2,:))/(merge_weight);
+    %K_C_tmp(min_idx1,:)		=	(K_C_tmp(min_idx1,:)*(merge_weight-1)+K_C_tmp(min_idx2,:))/(merge_weight);
+	K_C_tmp(min_idx1,:)		=	(K_C_tmp(min_idx1,:)*(merge_weight-1)+K_C_tmp(Ncluster+1,:))/(merge_weight);
     K_C_merge_cnt			=	K_C_merge_cnt + 1;
     K_C_count1(min_idx1)	=	K_C_count1(min_idx1) + 1;
-    K_C_tmp(max_idx2,:)		=	cluster_input(i,:);
+    %K_C_tmp(max_idx2,:)		=	cluster_input(i,:);
+
 	%else
 	%	if(j ~= Ncluster)	% new mean
 	%		j = j + 1;

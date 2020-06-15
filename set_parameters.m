@@ -21,8 +21,8 @@ detect_opt.Thr              =   700;
 detect_opt.Thr_a            =   12;
 detect_opt.reverse          =   1;
 detect_opt.spike_length     =   opt.spike_length;
-detect_opt.align_idx        =   10; %15; 
-detect_opt.halt_range       =   10; 
+detect_opt.align_idx        =   15; %15; 
+detect_opt.halt_range       =   1; 
     % 0 for default : spike_length/2
     % detector halt time to avoid multiple detection of same spike
 detect_opt.overlap_range    =   0; 
@@ -37,7 +37,10 @@ detect_opt.align_opt        =   'det';
     % 'det'     : detected point itself
     % 'slope'   : max slope
     % 'amp'     : max amp
-detect_opt.NEO_C            =   8; % many researches set C = 8 (empirically)
+detect_opt.NEO_C            =   64; 
+    % many researches set C = 8 (empirically)
+    % for this dataset, 128 shows best metric value
+    % for this dataset, 64 is best for SDC
 detect_opt.NEO_N            =   opt.spike_length; 
 opt.detected_suffix         =   ['_detected_' detect_opt.detect_method];
 

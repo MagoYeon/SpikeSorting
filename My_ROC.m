@@ -84,17 +84,53 @@ end
 
 if ~exist([outDir, datName, detected_suffix, '_Thr','.mat'])
     fprintf('Time %3.0fs. Compute Threshold for Plot...\n', toc);
-    Thr = mean(NEO_data,2);
-    save([outDir, datName, detected_suffix, '_Thr'], 'Thr', '-v7.3');
+    NEO_Thr = mean(NEO_data,2);
+    save([outDir, datName, detected_suffix, '_Thr'], 'NEO_Thr', '-v7.3');
 else
     fprintf('Time %3.0fs. Load NEO Thr...\n', toc);
-    Thr = load([outDir, datName, detected_suffix, '_Thr','.mat']).Thr;
+    NEO_Thr = load([outDir, datName, detected_suffix, '_Thr','.mat']).NEO_Thr;
+end
+
+in_data = filtered_data;
+Nspike = size(gtRes,1);
+
+roc_range = [-1*bitshift(1,10:-5:1) bitshift(1,0:12)];
+
+k = 0;
+for i = roc_range
+	NEO_C = i;
+    k = k + 1;
+	Thr = NEO_C * NEO_Thr;
+
+	detection_out(k) = ROC_NEO(in_data,NEO_data, Thr, detect_opt, opt);
+    Ndetected(k) = size(detection_out(k).spike_time,1);
+	[TP(k) TN(k) FP(k) FN(k)] = eval_det(detection_out(k).spike_time, gtRes, gtClu(2:end), Nsamples, opt);
+end
+    eval_out.TP = TP;
+    eval_out.TN = TN;
+    eval_out.FP = FP;
+    eval_out.FN = FN;
+    save([outDir, datName, detected_suffix, '_eval'], 'eval_out', '-v7.3');
+
+for i = 5:k-3
+	fprintf('NEO_C : %d\n',roc_range(i));
+	fprintf('\t\t\tTrue\t\tFalse\n');
+	fprintf('\tPositive\t%d\t\t%d\n',TP(i), FP(i));
+	fprintf('\tNegative\t%d\t%d\n',TN(i), FN(i));
+	fprintf('\tTPR : %f', TP(i)/(Nspike));
+	fprintf('\tTNR : %f\n', TN(i)/(Nsamples-Nspike));
+	fprintf('\tDetection Accuracy\t- [TP/P]: %5.2f%%\n', 100*TP(i)/Ndetected(i));
+	fprintf('\n');
 end
 
 
-Thr = NEO_C * Thr;
-
-detection_out = ROC_NEO(in_data,NEO_data, Thr, detect_opt, opt);
-[TP TN FP FN] = eval_det(detection_out.spike_time, gtRes, gtClu(2:end), Nsamples, opt);
-
-
+figure;
+hold on
+%for i = 1:size(roc_range,2)
+%    plot(1-(TN(i)/(Nsamples -Nspike)),TP(i)/Nspike,'ro');
+%end
+plot(1-(TN/(Nsamples -Nspike)),TP/Nspike,'ro');
+hold off
+xlabel('Probability of False Alarm')
+ylabel('Probability of Detection')
+set(gcf,'color','w');

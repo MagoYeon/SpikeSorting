@@ -38,8 +38,8 @@ align_amp	= strcmp(align_opt , 'amp');
 align_det	= strcmp(align_opt , 'det');
 align_slope	= strcmp(align_opt , 'slope');
 
-fprintf('NEO C:%d\t', NEO_C);
-fprintf('NEO N:%d\n', NEO_N);
+%fprintf('NEO C:%d\t', NEO_C);
+%fprintf('NEO N:%d\n', NEO_N);
 fprintf('Time %3.0fs. Spike Detection(NEO) Started \n', toc);
 % reverse = 0;
 %if(reverse)
@@ -50,7 +50,7 @@ fprintf('Time %3.0fs. Spike Detection(NEO) Started \n', toc);
 %end
 
 data = in_data;
-Thr     = zeros(Nchan,1);
+%Thr     = zeros(Nchan,1);
 
 if(overlap_range == 0)
     overlap_range = floor(spike_length/2);
@@ -94,7 +94,11 @@ k = 0;
 i = 2;
 j = 1;
 
-detection_out = struct('spike_time', [], 'spike',[],'spike_ch', [], 'channel',[], 'overlap',[]); 
+spike_time  = zeros(Nsamples,1);
+spike_ch    = zeros(Nsamples,1,'uint16');
+spike       = zeros(Nsamples,spike_length,'uint16');
+channel     = zeros(Nsamples,Nchan,'uint8');
+
 detected_ch = zeros(1,Nchan,'uint8');
 detected_ch = zeros(1,1,'uint8');
 detected = 0;
@@ -121,7 +125,7 @@ detect_done = 0;
 fprintf('Time %3.0fs. Detection Processing Started \n', toc);
 fprintf('\tDetection processing [%%]:      ');
 while i <= Nsamples-1
-    if(mod(i,100000)==0)
+    if(mod(i,ceil(Nsamples/100))==0)
         fprintf(repmat('\b',1,6));
         fprintf('%6.2f',(i/Nsamples)*100);
     end
@@ -231,10 +235,10 @@ while i <= Nsamples-1
 	i = i + halt_range;
 end
 detection_out = struct('spike_time', [], 'spike',[],'spike_ch', [], 'channel',[], 'overlap',[]); 
-detection_out.spike_time    = spike_time';
-detection_out.spike         = spike;
-detection_out.spike_ch      = spike_ch';
-detection_out.channel       = channel;
+detection_out.spike_time    = spike_time(1:k);
+detection_out.spike         = spike(1:k,:);
+detection_out.spike_ch      = spike_ch(1:k);
+detection_out.channel       = channel(1:k,:);
 %detection_out.overlap       = overlap';
 
 fprintf('\nTime %3.0fs. Spike Detection Finished \n', toc);
@@ -242,32 +246,32 @@ fprintf('\t# of spikes : %d\n',k);
 %fprintf('\t# of overlap : %d\n',overlap_num);
 %Tmp_plot_num
 
-fprintf('Time %3.0fs. Saving Detected Spikes Started \n', toc);
-save([outDir, datName, detected_suffix], 'detection_out', '-v7.3');
-fprintf('Time %3.0fs. Saving Detected Spikes Finished \n', toc);
+%fprintf('Time %3.0fs. Saving Detected Spikes Started \n', toc);
+%%save([outDir, datName, detected_suffix], 'detection_out', '-v7.3');
+%fprintf('Time %3.0fs. Saving Detected Spikes Finished \n', toc);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if (detect_opt.do_plot)
     fprintf('Time %3.0fs. Plotting Detected Spike Started \n', toc);
-    fig_det1 = figure('Name','Detected Signals - every channel','NumberTitle','off');
-	X = 1:spike_length;
-    p = uipanel('Parent',fig_det1,'BorderType','none'); 
-	fnum = Nchan;
-	fsize = ceil(sqrt(fnum));
-	for i = 1:ceil(k/10) %only 10%
-		subplot(fsize,fsize,detection_out.spike_ch(i),'Parent',p)
-		hold on;
-        plot(X, detection_out.spike(i,:));
-        plot(align_idx, detection_out.spike(i,align_idx), 'ro');
-	    %plot(X, NEO_data(detection_out.spike_ch(i),X+detection_out.spike_time(i)));
-	    %plot(X, Thr(detection_out.spike_ch(i),X+detection_out.spike_time(i)));
-		hold off;
-	end
-	for i = 1:Nchan
-		subplot(fsize,fsize,i,'Parent',p)
-        title({['Ch:',num2str(i)]})
-	end
+    %fig_det1 = figure('Name','Detected Signals - every channel','NumberTitle','off');
+	%X = 1:spike_length;
+    %p = uipanel('Parent',fig_det1,'BorderType','none'); 
+	%fnum = Nchan;
+	%fsize = ceil(sqrt(fnum));
+	%for i = 1:ceil(k/10) %only 10%
+	%	subplot(fsize,fsize,detection_out.spike_ch(i),'Parent',p)
+	%	hold on;
+    %    plot(X, detection_out.spike(i,:));
+    %    plot(align_idx, detection_out.spike(i,align_idx), 'ro');
+	%    %plot(X, NEO_data(detection_out.spike_ch(i),X+detection_out.spike_time(i)));
+	%    %plot(X, Thr(detection_out.spike_ch(i),X+detection_out.spike_time(i)));
+	%	hold off;
+	%end
+	%for i = 1:Nchan
+	%	subplot(fsize,fsize,i,'Parent',p)
+    %    title({['Ch:',num2str(i)]})
+	%end
 	%%%pause;
 
     fig_det1_1 = figure('Name','Whole Signals - every channel','NumberTitle','off');
