@@ -94,24 +94,33 @@ end
 in_data = filtered_data;
 Nspike = size(gtRes,1);
 
-roc_range = [-1*bitshift(1,15:-5:1) bitshift(1,0:12)];
+roc_range = [-1*bitshift(1,5) bitshift(1,0:12)];
 
-k = 0;
-for i = roc_range
-    fprintf('NEO_C : %d\n', i);
-	NEO_C = i;
-    k = k + 1;
-	Thr = NEO_C * NEO_Thr;
+if ~exist([outDir, datName, detected_suffix, '_eval','.mat'])
+	k = 0;
+	for i = roc_range
+		fprintf('NEO_C : %d\n', i);
+		NEO_C = i;
+		k = k + 1;
+		Thr = NEO_C * NEO_Thr;
 
-	detection_out(k) = ROC_NEO(in_data,NEO_data, Thr, detect_opt, opt);
-    Ndetected(k) = size(detection_out(k).spike_time,1);
-	[TP(k) TN(k) FP(k) FN(k)] = eval_det(detection_out(k).spike_time, gtRes, gtClu(2:end), Nsamples, opt);
+		detection_out(k) = ROC_NEO(in_data,NEO_data, Thr, detect_opt, opt);
+		Ndetected(k) = size(detection_out(k).spike_time,1);
+		[TP(k) TN(k) FP(k) FN(k)] = eval_det(detection_out(k).spike_time, gtRes, gtClu(2:end), Nsamples, opt);
+	end
+	eval_out.TP = TP;
+	eval_out.TN = TN;
+	eval_out.FP = FP;
+	eval_out.FN = FN;
+	save([outDir, datName, detected_suffix, '_eval'], 'eval_out', '-v7.3');
+else
+	eval_out = load([outDir, datName, detected_suffix, '_eval','.mat']).eval_out;
+	TP = eval_out.TP;
+	TN = eval_out.TN;
+	FP = eval_out.FP;
+	FN = eval_out.FN;
+	k = size(FN,1);
 end
-    eval_out.TP = TP;
-    eval_out.TN = TN;
-    eval_out.FP = FP;
-    eval_out.FN = FN;
-    save([outDir, datName, detected_suffix, '_eval'], 'eval_out', '-v7.3');
 
 for i = 5:k-3
 	fprintf('NEO_C : %d\n',roc_range(i));

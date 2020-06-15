@@ -168,12 +168,12 @@ while i <= Nsamples-1
 			spike_start_idx = (max_amp_time-align_idx+1);
 		elseif(align_slope)
 			% this range need modification
-			for det_idx = max_amp_time-overlap_range:max_amp_time+overlap_range 
+			for det_idx = max_amp_time-floor(spike_length/2):max_amp_time+floor(spike_length/2) 
 				det_slope(det_idx) = abs(data(max_amp_ch,det_idx)-data(max_amp_ch,det_idx+1));
 			end
 			[~,max_idx] = max(det_slope);
 			spike_start_idx = (max_idx-align_idx+1);
-            det_slope = [];
+            clearvars det_slope;
 		end
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -197,7 +197,7 @@ while i <= Nsamples-1
 			%detection_out.channel(k,:) = detected_ch;
 			spike_time(k) = max_amp_time;
 			spike_ch(k) = max_amp_ch;
-			spike(k,:) = data(max_amp_ch,[(spike_start_idx):(spike_start_idx+spike_length-1)]);
+			%spike(k,:) = data(max_amp_ch,[(spike_start_idx):(spike_start_idx+spike_length-1)]);
 			channel(k,:) = detected_ch;
 
 			%overlap check
@@ -236,9 +236,12 @@ while i <= Nsamples-1
 end
 detection_out = struct('spike_time', [], 'spike',[],'spike_ch', [], 'channel',[], 'overlap',[]); 
 detection_out.spike_time    = spike_time(1:k);
-detection_out.spike         = spike(1:k,:);
+clearvars spike_time;
+%detection_out.spike         = spike(1:k,:);
 detection_out.spike_ch      = spike_ch(1:k);
+clearvars spike_ch;
 detection_out.channel       = channel(1:k,:);
+clearvars channel;
 %detection_out.overlap       = overlap';
 
 fprintf('\nTime %3.0fs. Spike Detection Finished \n', toc);
@@ -357,7 +360,7 @@ if (detect_opt.do_plot)
     %    plot(X, detection_out.spike(i,:));
     %    %end
     %end
-    hold off
+    %hold off
 end
 
 

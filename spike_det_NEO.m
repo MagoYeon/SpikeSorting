@@ -52,9 +52,9 @@ fprintf('Time %3.0fs. Spike Detection(NEO) Started \n', toc);
 data = in_data;
 Thr     = zeros(Nchan,1);
 
-if(overlap_range == 0)
-    overlap_range = floor(spike_length/2);
-end
+%if(overlap_range == 0)
+%    overlap_range = floor(spike_length/2);
+%end
 
 if(halt_range == 0)
     halt_range = floor(spike_length/2);
@@ -94,6 +94,11 @@ k = 0;
 i = 2;
 j = 1;
 
+spike_time  = zeros(Nsamples,1);
+spike_ch    = zeros(Nsamples,1,'uint16');
+spike       = zeros(Nsamples,spike_length,'uint16');
+channel     = zeros(Nsamples,Nchan,'uint8');
+
 detection_out = struct('spike_time', [], 'spike',[],'spike_ch', [], 'channel',[], 'overlap',[]); 
 detected_ch = zeros(1,Nchan,'uint8');
 detected_ch = zeros(1,1,'uint8');
@@ -121,7 +126,7 @@ detect_done = 0;
 fprintf('Time %3.0fs. Detection Processing Started \n', toc);
 fprintf('\tDetection processing [%%]:      ');
 while i <= Nsamples-1
-    if(mod(i,100000)==0)
+    if(mod(i,100)==0)
         fprintf(repmat('\b',1,6));
         fprintf('%6.2f',(i/Nsamples)*100);
     end
@@ -147,7 +152,7 @@ while i <= Nsamples-1
 		j = j+1;
 	end
 
-	if( detect_flag && ( ( i - detect_time) > overlap_range) )
+	if( detect_flag && ( ( i - detect_time) >= overlap_range) )
 		detect_flag = 0;
 		detect_done = 1;
 	end
@@ -164,12 +169,12 @@ while i <= Nsamples-1
 			spike_start_idx = (max_amp_time-align_idx+1);
 		elseif(align_slope)
 			% this range need modification
-			for det_idx = max_amp_time-overlap_range:max_amp_time+overlap_range 
+			for det_idx = max_amp_time-floor(spike_length/2):max_amp_time+floor(spike_length/2) 
 				det_slope(det_idx) = abs(data(max_amp_ch,det_idx)-data(max_amp_ch,det_idx+1));
 			end
 			[~,max_idx] = max(det_slope);
 			spike_start_idx = (max_idx-align_idx+1);
-            det_slope = [];
+            clearvars det_slope;
 		end
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -232,9 +237,13 @@ while i <= Nsamples-1
 end
 detection_out = struct('spike_time', [], 'spike',[],'spike_ch', [], 'channel',[], 'overlap',[]); 
 detection_out.spike_time    = spike_time';
+clearvars spike_time;
 detection_out.spike         = spike;
+clearvars spike;
 detection_out.spike_ch      = spike_ch';
+clearvars spike_ch;
 detection_out.channel       = channel;
+clearvars channel;
 %detection_out.overlap       = overlap';
 
 fprintf('\nTime %3.0fs. Spike Detection Finished \n', toc);
@@ -342,16 +351,16 @@ if (detect_opt.do_plot)
     fprintf('Time %3.0fs. Plotting Detected Spike Finished \n', toc);
 	%Tmp_plot_idx(1)
 
-    fig_det4 = figure('Name','All Detected Signals','NumberTitle','off');
-    p = uipanel('Parent',fig_det4,'BorderType','none'); 
-	X = 1:spike_length;
-    subplot(1,1,1,'Parent',p)
-    hold on
-    for i = 1:size(detection_out.spike,1)
-        %if(max(detection_out.spike(i,:)) > Thr(1))
-        plot(X, detection_out.spike(i,:));
-        %end
-    end
-    hold off
+    %fig_det4 = figure('Name','All Detected Signals','NumberTitle','off');
+    %p = uipanel('Parent',fig_det4,'BorderType','none'); 
+	%X = 1:spike_length;
+    %subplot(1,1,1,'Parent',p)
+    %hold on
+    %for i = 1:size(detection_out.spike,1)
+    %    %if(max(detection_out.spike(i,:)) > Thr(1))
+    %    plot(X, detection_out.spike(i,:));
+    %    %end
+    %end
+    %hold off
 end
 
