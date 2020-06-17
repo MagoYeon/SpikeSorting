@@ -23,7 +23,7 @@ spike_ch		=	in_data.spike_ch;
 
 spike_num	= size(spike, 1);
 
-feature_out = zeros(spike_num,2);
+feature_out = zeros(spike_num,4);
 
 fprintf('Time %3.0fs. Feature Extraction Started \n', toc);
 
@@ -31,7 +31,7 @@ for i = 1:spike_num
 	feature_out(i,:) = [8*spike(i,8)-2*spike(i,7)-6*spike(i,6)-4*spike(i,5) ...
 						8*spike(i,11)-2*spike(i,10)-6*spike(i,9)-4*spike(i,8) ...
 						8*spike(i,18)-2*spike(i,17)-6*spike(i,16)-4*spike(i,15) ...
-						8*spike(i,25)-2*spike(i,24)-6*spike(i,23)-4*spike(i,22)]
+						8*spike(i,25)-2*spike(i,24)-6*spike(i,23)-4*spike(i,22)];
 end
 
 if (feature_opt.do_plot)

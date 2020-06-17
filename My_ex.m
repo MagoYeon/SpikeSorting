@@ -2,7 +2,7 @@ fprintf('Start\n\n');
 tic;
 
 fprintf('Time %3.0fs. Set Parameters \n', toc);
-set_parameters
+set_parameters3
 
 datDir              =   opt.datDir;
 datName             =   opt.datName;
@@ -116,6 +116,9 @@ end
 %% 
 
 % Detection
+detect_opt.align_idx        =   15; %15; 
+detect_opt.align_opt        =   'amp';  
+
 detect_method	= detect_opt.detect_method;
 dvt	                = strcmp(detect_method , 'dvt');
 NEO	                = strcmp(detect_method , 'NEO');
@@ -139,12 +142,9 @@ end
 % Feature Extraction
     feature_out =   feature_extraction(detection_out, feature_opt, opt, Nchan);
 
-    feature_out =   feature_ext_TVLSI(detection_out,feature_opt,opt,Nchan);
-    feature_out =   feature_ext_ZCF(detection_out,feature_opt,opt,Nchan);
-    feature_out =   feature_ext_MD(detection_out,feature_opt,opt,Nchan);
-
 % Cluster
     [cluster_out K_C]=   My_clustering2(feature_out, detection_out.channel, detection_out.spike_ch, cluster_opt, opt);
+    %[cluster_out K_C]=   clustering(feature_out, detection_out.channel, detection_out.spike_ch, cluster_opt, opt);
 
 % Evaluation
     evaluation_out  =   evaluation(detection_out.spike_time, cluster_out, gtRes, gtClu(2:end), Nsamples, cluster_opt.Ncluster, opt);

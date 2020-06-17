@@ -19,12 +19,14 @@ plot_ch             =   opt.plot_ch;
 fprintf('Time %3.0fs. Filtering Raw Data Started \n', toc);
 fprintf('Filtering Channel :    ');
 % Nchan = 2;
+filtered_int16_data = zeros(Nchan,Nsamples,'int16');
+filtered_int16_tmp = zeros(1,Nsamples,'single');
 for i = 1:Nchan
     fprintf(repmat('\b',1,3));
     fprintf('%3d',i);
-    filtered_int16_data(i,:) = cast(rawData(i,:), 'single'); % double takes so much time?
-	filtered_int16_data(i,:) = bandpass(filtered_int16_data(i,:), filter_band, Fs);
-    filtered_int16_data(i,:) = cast(filtered_int16_data(i,:), 'int16');
+    filtered_int16_tmp          = cast(rawData(i,:), 'single'); % double takes so much time?
+	filtered_int16_tmp          = bandpass(filtered_int16_tmp, filter_band, Fs);
+    filtered_int16_data(i,:) = cast(filtered_int16_tmp, 'int16');
 end
 fprintf('\nTime %3.0fs. Filtering Raw Data Finished \n', toc);
 

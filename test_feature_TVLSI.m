@@ -117,7 +117,7 @@ end
 
 % Detection
 detect_opt.align_idx        =   11; %15; 
-detect_opt.align_opt        =   'slope';  
+detect_opt.align_opt        =   'amp';  
 
 detect_method	= detect_opt.detect_method;
 dvt	                = strcmp(detect_method , 'dvt');
@@ -140,10 +140,10 @@ end
 %%
 
 % Feature Extraction
-    feature_out =   feature_ext_TVLSI(detection_out,feature_opt,opt,Nchan);
+    feature_out =   feature_ex_TVLSI(detection_out,feature_opt,opt,Nchan);
 
 % Cluster
-    [cluster_out K_C]=   clustering(feature_out, detection_out.channel, detection_out.spike_ch, cluster_opt, opt);
+    [cluster_out K_C]=   clustering(feature_out, [], detection_out.spike_ch, cluster_opt, opt);
 
 % Evaluation
     evaluation_out  =   evaluation(detection_out.spike_time, cluster_out, gtRes, gtClu(2:end), Nsamples, cluster_opt.Ncluster, opt);

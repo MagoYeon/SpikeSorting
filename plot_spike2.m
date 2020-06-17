@@ -36,7 +36,7 @@ end
 %    fprintf('Time %3.0fs. Reversing data...\n', toc);
 %    data = -1*in_data;
 %else
-%    data = in_data;
+    data = in_data;
 %end
 
 if(overlap_range == 0)

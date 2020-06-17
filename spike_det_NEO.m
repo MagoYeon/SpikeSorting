@@ -82,13 +82,13 @@ end
 
 if ~exist([outDir, datName, detected_suffix, '_Thr','.mat'])
     fprintf('Time %3.0fs. Compute Threshold for Plot...\n', toc);
-    Thr = mean(NEO_data,2);
-    save([outDir, datName, detected_suffix, '_Thr'], 'Thr', '-v7.3');
+    NEO_Thr = mean(NEO_data,2);
+    save([outDir, datName, detected_suffix, '_Thr'], 'NEO_Thr', '-v7.3');
 else
     fprintf('Time %3.0fs. Load NEO Thr...\n', toc);
-    Thr = load([outDir, datName, detected_suffix, '_Thr','.mat']).Thr;
+    NEO_Thr = load([outDir, datName, detected_suffix, '_Thr','.mat']).NEO_Thr;
 end
-    Thr = NEO_C * Thr;
+    Thr = NEO_C * NEO_Thr;
 
 k = 0;
 i = 2;

@@ -116,9 +116,9 @@ end
 %% 
 
 % Detection
-detect_opt.align_idx        =   12;
-detect_opt.spike_length     =   30;
-detect_opt.align_opt        =   'det';  
+detect_opt.align_idx        =   11; %15; 
+detect_opt.align_opt        =   'amp';  
+detect_opt.spike_length     =   48;  
 
 detect_method	= detect_opt.detect_method;
 dvt	                = strcmp(detect_method , 'dvt');
@@ -141,7 +141,7 @@ end
 %%
 
 % Feature Extraction
-    feature_out =   feature_ex_ZCF(detection_out, detect_opt.align_idx,feature_opt,opt,Nchan);
+    feature_out =   feature_ex_DD(detection_out,feature_opt,opt,Nchan);
 
 % Cluster
     [cluster_out K_C]=   clustering(feature_out, [], detection_out.spike_ch, cluster_opt, opt);

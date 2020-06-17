@@ -14,7 +14,7 @@ opt.datName = '20141202_all_es';
 %opt.datName = '20141202_all_GT';
 %opt.datName = 'kampff1';
 
-opt.outDir = './output/';
+opt.outDir = './output/set1/';
 opt.dat =[opt.datDir, opt.datName, '.dat'];
 
 opt.filtered_suffix     = '_filtered';
@@ -39,7 +39,7 @@ detect_opt.align_idx        =   15; %15;
 detect_opt.halt_range       =   1; 
     % 0 for default : spike_length/2
     % detector halt time to avoid multiple detection of same spike
-detect_opt.overlap_range    =   opt.spike_length/2; 
+detect_opt.overlap_range    =   0; 
     % 0 for default : spike_length/2 
     % spikes within this range are assumed to be overlapped spike
 detect_opt.detect_method    =   'NEO';  
@@ -51,9 +51,9 @@ detect_opt.align_opt        =   'det';
     % 'det'     : detected point itself
     % 'slope'   : max slope
     % 'amp'     : max amp
-detect_opt.NEO_C            =   256; 
+detect_opt.NEO_C            =   64; 
     % many researches set C = 8 (empirically)
-    % for this dataset, 256 shows best detection metric value
+    % for this dataset, 128 shows best metric value
     % for this dataset, 64 is best for SDC
 detect_opt.NEO_N            =   opt.spike_length; 
 opt.detected_suffix         =   ['_detected_' detect_opt.detect_method];

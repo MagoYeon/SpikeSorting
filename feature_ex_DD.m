@@ -1,4 +1,4 @@
-function [feature_out] = feature_ex_ZCF(in_data, align_idx, feature_opt, opt, Nchan);
+function [feature_out] = feature_ex_TVLSI(in_data, feature_opt, opt, Nchan);
 
 %Nsamples = 16623305; % 20%
 %Nsamples = ceil(size(in_data,2) * 0.016); 
@@ -23,13 +23,19 @@ spike_ch		=	in_data.spike_ch;
 
 spike_num	= size(spike, 1);
 
-feature_out = zeros(spike_num,2);
+feature_out = zeros(spike_num,3*7);
 
 fprintf('Time %3.0fs. Feature Extraction Started \n', toc);
 
+j = 8;
 for i = 1:spike_num
-	sum_idx				= find(spike(i,align_idx:end)==0,1);
-	feature_out(i,:)	= [sum(spike(i,1:sum_idx-1)) sum(spike(i,sum_idx:end))];
+	feature_out(i,:) = [spike(i,j)-spike(i,j-1) spike(i,j)-spike(i,j-3) spike(i,j)-spike(i,j-7) ...
+	                    spike(i,j+6)-spike(i,j+6-1) spike(i,j+6)-spike(i,j+6-3) spike(i,j+6)-spike(i,j+6-7) ...
+	                    spike(i,j+12)-spike(i,j+12-1) spike(i,j+12)-spike(i,j+12-3) spike(i,j+12)-spike(i,j+12-7) ...
+	                    spike(i,j+18)-spike(i,j+18-1) spike(i,j+18)-spike(i,j+18-3) spike(i,j+18)-spike(i,j+18-7) ...
+	                    spike(i,j+24)-spike(i,j+24-1) spike(i,j+24)-spike(i,j+24-3) spike(i,j+24)-spike(i,j+24-7) ...
+	                    spike(i,j+30)-spike(i,j+30-1) spike(i,j+30)-spike(i,j+30-3) spike(i,j+30)-spike(i,j+30-7) ...
+	                    spike(i,j+36)-spike(i,j+36-1) spike(i,j+36)-spike(i,j+36-3) spike(i,j+36)-spike(i,j+36-7)];
 end
 
 if (feature_opt.do_plot)
