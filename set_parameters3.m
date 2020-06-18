@@ -39,10 +39,10 @@ detect_opt.align_idx        =   15; %15;
 detect_opt.halt_range       =   1; 
     % 0 for default : spike_length/2
     % detector halt time to avoid multiple detection of same spike
-detect_opt.overlap_range    =   0; 
+detect_opt.overlap_range    =   5; 
     % 0 for default : spike_length/2 
     % spikes within this range are assumed to be overlapped spike
-detect_opt.detect_method    =   'NEO';  
+detect_opt.detect_method    =   'dvt';  
     % 'thr'     : simple threshold
     % 'dvt'    : Convex threshold
     % 'NEO'     : NEO

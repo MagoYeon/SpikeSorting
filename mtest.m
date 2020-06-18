@@ -1,4 +1,4 @@
-set_parameters
+set_parameters3
 DA = 0;
 CA = 0;
 SA = 0;
@@ -42,6 +42,7 @@ xlabel('Channel Weigth');
 for i = 1:num
     xt{i} = ['2^{' num2str(range(i)),'}'];
 end
+
 xlim([bitshift(1,range(1)) bitshift(1,range(end))]);
 set(gca,'XTick',bitshift(1,range))	% Y axis values going to be affected
 set(gca,'XTickLabel',xt);	% Values goint to appear in above(YTick) places

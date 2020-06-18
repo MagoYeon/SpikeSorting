@@ -1,11 +1,11 @@
-function [detection_out] = spike_det_dvt2(in_data, detect_opt, opt);
+function [detection_out] = ROC_SVT(in_data, Thr, detect_opt, opt,save_flag);
 
 
 
 Nchan = size(in_data, 1);
-%Nsamples = size(in_data, 2);
+Nsamples = size(in_data, 2);
 %Nsamples = 16623305; % 20%
-Nsamples = ceil(size(in_data,2) * 0.05); 
+%Nsamples = ceil(size(in_data,2) * 0.05); 
 % Nsample range, ylim
 
 datDir              =   opt.datDir;
@@ -25,6 +25,7 @@ align_idx		=   detect_opt.align_idx;
 align_opt		=	detect_opt.align_opt;
 detect_method	=	detect_opt.detect_method;
 overlap_range   =   detect_opt.overlap_range;	% 1~2
+halt_range      =   detect_opt.halt_range;
 
 plot_ch			=	1;
 %plot_ch			=	98;
@@ -44,13 +45,22 @@ fprintf('Time %3.0fs. Spike Detection(dvt) Started \n', toc);
     data = in_data;
 %end
 
-if(overlap_range == 0)
-    overlap_range = floor(spike_length/2);
+%if(overlap_range == 0)
+%    overlap_range = floor(spike_length/2);
+%end
+
+if(halt_range == 0)
+    halt_range = floor(spike_length/2);
 end
 
 k = 0;
 i = 2;
 j = 1;
+
+spike_time  = zeros(Nsamples,1);
+spike_ch    = zeros(Nsamples,1,'uint16');
+spike       = zeros(Nsamples,spike_length,'int16');
+channel     = zeros(Nsamples,Nchan,'uint8');
 
 detection_out = struct('spike_time', [], 'spike',[],'spike_ch', [], 'channel',[], 'overlap',[]); 
 detected_ch = zeros(1,Nchan,'uint8');
@@ -59,7 +69,6 @@ detected = 0;
 detected_tmp = 0;
 overlap_num = 0;
 peak = 10000*ones(average_range);	%significant initial value to avoid initial detection error
-peak_idx = 0;
 peak_num = 0;
 Thr = Thr_a*10000*ones(Nchan,1);
 Tmp_plot_idx = zeros(1,Nsamples);
@@ -69,30 +78,30 @@ Tmp_plot_ch = plot_ch;
 
 % since it takes short time, no need to load it.
 %if ~exist([outDir, datName, threshold_suffix,'.mat'])
-    fprintf('Time %3.0fs. Threshold Processing Started \n', toc);
-    for peak_j = 1:Nchan
-		peak = 10000*ones(average_range);
-		peak_num = 0;
-		%fprintf('ch %d start\n', peak_j);
-		for peak_i = 2:Nsamples-1
-            %concave = ( (data_c<data_n) && (data_c<=data_p) );
-            convex  = ( (data(peak_j,peak_i)>data(peak_j,peak_i+1)) && (data(peak_j,peak_i)>=data(peak_j,peak_i-1)) );
-            if( convex && (data(peak_j,peak_i) > 0) && (data(peak_j,peak_i) < Thr(peak_j)) ) %|| concave )
-                peak = [data(peak_j,peak_i) peak(1:average_range-1)];
-                Thr(peak_j) = mean(peak); 	
-				peak_num = peak_num + 1;
-				if(peak_num == average_range)
-					%fprintf('ch %d done\n', peak_j);
-					break;
-				end
-            end
-        end
-    end
-    fprintf('Time %3.0fs. Threshold Processing Finished \n', toc);
-
-    fprintf('Time %3.0fs. Saving Threshold Started \n', toc);
-    %save([outDir, datName, threshold_suffix, '.mat'], 'Thr', '-v7.3');
-    fprintf('Time %3.0fs. Saving Threshold Finished \n', toc);
+%    fprintf('Time %3.0fs. Threshold Processing Started \n', toc);
+%    for peak_j = 1:Nchan
+%		peak = 10000*ones(average_range);
+%		peak_num = 0;
+%		%fprintf('ch %d start\n', peak_j);
+%		for peak_i = 2:Nsamples-1
+%            %concave = ( (data_c<data_n) && (data_c<=data_p) );
+%            convex  = ( (data(peak_j,peak_i)>data(peak_j,peak_i+1)) && (data(peak_j,peak_i)>=data(peak_j,peak_i-1)) );
+%            if( convex && (data(peak_j,peak_i) > 0) && (data(peak_j,peak_i) < Thr(peak_j)) ) %|| concave )
+%                peak = [data(peak_j,peak_i) peak(1:average_range-1)];
+%                Thr(peak_j) = mean(peak); 	
+%				peak_num = peak_num + 1;
+%				if(peak_num == average_range)
+%					%fprintf('ch %d done\n', peak_j);
+%					break;
+%				end
+%            end
+%        end
+%    end
+%    fprintf('Time %3.0fs. Threshold Processing Finished \n', toc);
+%
+%    fprintf('Time %3.0fs. Saving Threshold Started \n', toc);
+%    %save([outDir, datName, threshold_suffix, '.mat'], 'Thr', '-v7.3');
+%    fprintf('Time %3.0fs. Saving Threshold Finished \n', toc);
 
 %else
 %	fprintf('Threshold Exists\n');
@@ -100,9 +109,9 @@ Tmp_plot_ch = plot_ch;
 %    Thr = load([outDir, datName,threshold_suffix, '.mat']).Thr;
 %	fprintf('Time %3.0fs. Loading Threshold Finished \n', toc);
 %end
-    Thr = Thr_a * Thr;
-
-Thr(:) = 500;
+%    Thr = Thr_a * Thr;
+%
+%Thr(:) = 500;
         
 detect_flag = 0;
 max_amp	=	0;
@@ -114,7 +123,7 @@ detect_done = 0;
 fprintf('Time %3.0fs. Detection Processing Started \n', toc);
 fprintf('\tDetection processing [%%]:      ');
 while i <= Nsamples-1
-    if(mod(i,100000)==0)
+    if(mod(i,ceil(Nsamples/100))==0)
         fprintf(repmat('\b',1,6));
         fprintf('%6.2f',(i/Nsamples)*100);
     end
@@ -156,19 +165,24 @@ while i <= Nsamples-1
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Start Index %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		if(align_amp)
 			%detected spike to find max amp. point (max amp. point should be in the overlap range)
-			spike = data(max_amp_ch,[max_amp_time:max_amp_time+spike_length]);           
-			[~,max_idx] = max(spike);
-			spike_start_idx = (max_amp_time+max_idx-align_idx);
+            if(max_amp_time+spike_length < Nsamples)
+                spike_tmp = data(max_amp_ch,[max_amp_time:max_amp_time+spike_length]);           
+                [~,max_idx] = max(spike_tmp);
+                spike_start_idx = (max_amp_time+max_idx-align_idx);
+            else
+                spike_start_idx = 0;
+            end
 		elseif(align_det)
 			spike_start_idx = (max_amp_time-align_idx+1);
 		elseif(align_slope)
 			% this range need modification
-			for det_idx = max_amp_time-overlap_range:max_amp_time+overlap_range 
-				det_slope(det_idx) = abs(data(max_amp_ch,det_idx)-data(max_amp_ch,det_idx+1));
+            k = 0;
+			for det_idx = max_amp_time-floor(spike_length/2):max_amp_time+floor(spike_length/2) 
+                k = k+1;
+				det_slope(k) = abs(data(max_amp_ch,det_idx)-data(max_amp_ch,det_idx+1));
 			end
 			[~,max_idx] = max(det_slope);
-			spike_start_idx = (max_idx-align_idx+1);
-            det_slope = [];
+			spike_start_idx = (max_amp_time+max_idx-align_idx);
 		end
 		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -192,27 +206,30 @@ while i <= Nsamples-1
 			%detection_out.channel(k,:) = detected_ch;
 			spike_time(k) = max_amp_time;
 			spike_ch(k) = max_amp_ch;
-			spike(k,:) = data(max_amp_ch,[(spike_start_idx):(spike_start_idx+spike_length-1)]);
+            if(save_flag)
+			    spike(k,:) = data(max_amp_ch,[(spike_start_idx):(spike_start_idx+spike_length-1)]);
+            end
 			channel(k,:) = detected_ch;
 
 			%overlap check
-			overlap_cnt = 0;
-			for overlap_idx = 2:spike_length-1
-				overlapped = ( (spike(overlap_idx-1)<spike(overlap_idx)) && ...
-								(spike(overlap_idx+1)<=spike(overlap_idx)) && ...
-								(spike(overlap_idx) > Thr(max_amp_ch)) ); %further fix required
-				if(overlapped)
-					overlap_cnt = overlap_cnt + 1;
-				end
-			end
-			if(overlap_cnt > 1)
-				overlap(k) = 1;
-				overlap_num = overlap_num + 1;
-			else
-				overlap(k) = 0;
-			end
+			%overlap_cnt = 0;
+			%for overlap_idx = 2:spike_length-1
+			%	overlapped = ( (spike(overlap_idx-1)<spike(overlap_idx)) && ...
+			%					(spike(overlap_idx+1)<=spike(overlap_idx)) && ...
+			%					(spike(overlap_idx) > Thr(max_amp_ch)) ); %further fix required
+			%	if(overlapped)
+			%		overlap_cnt = overlap_cnt + 1;
+			%	end
+			%end
+			%if(overlap_cnt > 1)
+			%	overlap(k) = 1;
+			%	overlap_num = overlap_num + 1;
+			%else
+			%	overlap(k) = 0;
+			%end
 			% same spike Check
-			peak_tmp = peak;
+			%peak_tmp = peak;
+
 			%for tmp_i = i:i+overlap_range
 			%	if(i+overlap_range > Nsamples)
 			%		break;
@@ -226,23 +243,31 @@ while i <= Nsamples-1
 			%end
 		end
     end
-	i = i +1;
+	i = i +halt_range;
 end
 detection_out = struct('spike_time', [], 'spike',[],'spike_ch', [], 'channel',[], 'overlap',[]); 
-detection_out.spike_time    = spike_time';
-detection_out.spike         = spike;
-detection_out.spike_ch      = spike_ch';
-detection_out.channel       = channel;
-detection_out.overlap       = overlap';
+detection_out.spike_time    = spike_time(1:k);
+clearvars spike_time;
+if(save_flag)
+    detection_out.spike         = spike(1:k,:);
+    clearvars spike;
+end
+detection_out.spike_ch      = spike_ch(1:k);
+clearvars spike_ch;
+detection_out.channel       = channel(1:k,:);
+clearvars channel;
+%detection_out.overlap       = overlap';
 
 fprintf('\nTime %3.0fs. Spike Detection Finished \n', toc);
 fprintf('\t# of spikes : %d\n',k);
-fprintf('\t# of overlap : %d\n',overlap_num);
-Tmp_plot_num
+%fprintf('\t# of overlap : %d\n',overlap_num);
+%Tmp_plot_num
 
+if(save_flag)
 fprintf('Time %3.0fs. Saving Detected Spikes Started \n', toc);
-%save([outDir, datName, detected_suffix], 'detection_out', '-v7.3');
+save([outDir, datName, detected_suffix], 'detection_out', '-v7.3');
 fprintf('Time %3.0fs. Saving Detected Spikes Finished \n', toc);
+end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PLOT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
