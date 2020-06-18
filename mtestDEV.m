@@ -4,12 +4,14 @@ Nspike = size(gtRes,1);
 Thr = Thr_a * SVT_Thr;
 
 %SVT_roc_range = [-1*bitshift(1,5) bitshift(1,0:8) [512:100:1024] [129:10:256]];
-SVT_roc_range = [-16, 0:2:16];
+%SVT_roc_range = [-16, 0:2:16];
+SVT_roc_range = [1:10];
+SVT_roc_range = [8:15];
 
-if ~exist([outDir, datName, detected_suffix, '_eval','.mat'])
+if ~exist([outDir, datName, detected_suffix, '_dev_eval','.mat'])
     k = 0;
     for i = SVT_roc_range
-        fprintf('\tThr_a : %d\n', i);
+        fprintf('\tDEV Thr_a : %d\n', i);
         Thr_a = i;
         k = k + 1;
         Thr = Thr_a * SVT_Thr;
@@ -23,9 +25,9 @@ if ~exist([outDir, datName, detected_suffix, '_eval','.mat'])
     eval_out.FP         = SVT_FP;
     eval_out.FN         = SVT_FN;
     eval_out.Ndetected  = SVT_Ndetected;
-    save([outDir, datName, detected_suffix, '_eval'], 'eval_out', '-v7.3');
+    save([outDir, datName, detected_suffix, '_dev_eval'], 'eval_out', '-v7.3');
 else
-    eval_out = load([outDir, datName, detected_suffix, '_eval','.mat']).eval_out;
+    eval_out = load([outDir, datName, detected_suffix, '_dev_eval','.mat']).eval_out;
     SVT_TP          = eval_out.TP;
     SVT_TN          = eval_out.TN;
     SVT_FP          = eval_out.FP;

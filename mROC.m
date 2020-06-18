@@ -2,7 +2,7 @@ fprintf('Start\n\n');
 tic;
 
 fprintf('Time %3.0fs. Set Parameters \n', toc);
-set_parameters3
+set_parameters5
 
 roc             = 1;
 mtest_flag      = 0;
@@ -93,9 +93,11 @@ if(method_NEO)
 end
 if(method_SVT)
     data = in_data;
-    loadSVT
+    %loadSVT
+    loadDEV
     if(roc)
-        mtestSVT
+        %mtestSVT
+        mtestDEV
     end
 end
 if(method_ABS)

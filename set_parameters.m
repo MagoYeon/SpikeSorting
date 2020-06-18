@@ -32,7 +32,7 @@ opt.reverse         =   2;
 
 % detection
 detect_opt.Thr              =   700;
-detect_opt.Thr_a            =   12;
+detect_opt.Thr_a            =   12; % 13?
 detect_opt.reverse          =   1;
 detect_opt.spike_length     =   opt.spike_length;
 detect_opt.align_idx        =   15; %15; 

@@ -2,7 +2,7 @@ average_range	=	detect_opt.avg_range; % 32 16 8
 
 peak = 10000*ones(average_range);	%significant initial value to avoid initial detection error
 peak_num = 0;
-SVT_Thr = Thr_a*10000*ones(Nchan,1);
+SVT_Thr = 1000000*ones(Nchan,1);
 
 % since it takes short time, no need to load it.
 %if ~exist([outDir, datName, threshold_suffix,'.mat'])

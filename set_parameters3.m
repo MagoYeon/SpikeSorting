@@ -39,8 +39,8 @@ detect_opt.align_idx        =   15; %15;
 detect_opt.halt_range       =   1; 
     % 0 for default : spike_length/2
     % detector halt time to avoid multiple detection of same spike
-detect_opt.overlap_range    =   5; 
-    % 0 for default : spike_length/2 
+detect_opt.overlap_range    =   0; 
+    % 0 for default : spike_length/2  <- changed
     % spikes within this range are assumed to be overlapped spike
 detect_opt.detect_method    =   'dvt';  
     % 'thr'     : simple threshold
@@ -63,7 +63,7 @@ feature_opt.sum_idx         = detect_opt.align_idx;
 feature_opt.spike_length    = detect_opt.spike_length;
 
 % cluster
-cluster_opt.Ncluster        =   8; %opt.NgtClu+1; % 0 : set automatically
+cluster_opt.Ncluster        =   9; %opt.NgtClu+1; % 0 : set automatically
 cluster_opt.feature_weight  =   1;		
 cluster_opt.channel_weight  =   bitshift(1,10);% bitshift(1,10) = %1024
 cluster_opt.merge_weight    =   16; % bigger 16, 32

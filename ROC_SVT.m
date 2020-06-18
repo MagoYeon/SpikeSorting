@@ -15,7 +15,7 @@ threshold_suffix    =   opt.threshold_suffix;
 detected_suffix		=	opt.detected_suffix;
 plot_ch				=	opt.plot_ch;
 
-Thr				=   detect_opt.Thr;
+%Thr				=   detect_opt.Thr;
 %Thr_a           =   8;
 Thr_a           =   detect_opt.Thr_a;
 average_range	=	detect_opt.avg_range; % 32 16 8
@@ -70,7 +70,7 @@ detected_tmp = 0;
 overlap_num = 0;
 peak = 10000*ones(average_range);	%significant initial value to avoid initial detection error
 peak_num = 0;
-Thr = Thr_a*10000*ones(Nchan,1);
+%Thr = Thr_a*10000*ones(Nchan,1);
 Tmp_plot_idx = zeros(1,Nsamples);
 Tmp_plot_k = zeros(1,Nsamples);
 Tmp_plot_num = 0;
@@ -129,9 +129,9 @@ while i <= Nsamples-1
     end
 	j = 1;
 	while j <= Nchan    % this is for searching max amp spike
-		data_c  =   data(j,i);        % current data
-		data_p  =   data(j,i-1);      % previous data
-		data_n  =   data(j,i+1);      % next data
+		%data_c  =   data(j,i);        % current data
+		%data_p  =   data(j,i-1);      % previous data
+		%data_n  =   data(j,i+1);      % next data
 		%concave = ( (data_c<data_n) && (data_c<=data_p) );
 		%convex  = ( (data_c>data_n) && (data_c>=data_p) );
 		convex  = ( (data(j,i)>data(j,i+1)) && (data(j,i)>=data(j,i-1)) );
@@ -155,7 +155,7 @@ while i <= Nsamples-1
 		j = j+1;
 	end
 
-	if( detect_flag && ( ( i - detect_time) > overlap_range) )
+	if( detect_flag && ( ( i - detect_time) >= overlap_range) )
 		detect_flag = 0;
 		detect_done = 1;
 	end
