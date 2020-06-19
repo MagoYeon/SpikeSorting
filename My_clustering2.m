@@ -29,10 +29,11 @@ cnt_thr				=	cluster_opt.cnt_thr;
 % feature_w_1 is bigger
 
 channel				=	double(channel);
-Ndetected			=	size(in_data,1);
+Ndetected			=	size(channel,1);
 clr = lines(Ncluster);
 
-cluster_input       =   [(in_data*feature_weight), channel_weight*(double(channel))];
+%cluster_input       =   [(in_data*feature_weight), channel_weight*(double(channel))];
+cluster_input       =   [channel_weight*(double(channel))];
 cluster_input       =   double(cluster_input);
 
 fprintf('Cluster Info.\n');
@@ -121,7 +122,8 @@ while k < Ncluster
 	label_idx		= find(ch_diff <= ch_m_range,1);
 	if(label_idx)
 		k = k+1;
-		K_C_tmp(k,:) = [in_data(i,:)	double(channel(i,:))];
+		%K_C_tmp(k,:) = [in_data(i,:)	double(channel(i,:))];
+		K_C_tmp(k,:) = [double(channel(i,:))];
 	end
 end
 fprintf('\tCh Label : \n');
@@ -139,7 +141,8 @@ for i = 1:Ndetected
 %	ch_diff 		= sum(ch_diff,2);
 %	label_idx		= find(ch_diff <= ch_m_range,1);
 %	if(label_idx)
-		K_C_tmp(Ncluster+1,:) = [in_data(i,:)	channel_weight*double(channel(i,:))];
+		%%K_C_tmp(Ncluster+1,:) = [in_data(i,:)	channel_weight*double(channel(i,:))];
+		K_C_tmp(Ncluster+1,:) = [channel_weight*double(channel(i,:))];
 
 		%merge_out	=	c_merge(K_C_tmp, Ncluster+1, mean_weight);
 		merge_out	=	c_merge(K_C_tmp, 0, mean_weight);

@@ -5,8 +5,7 @@ Thr = Thr_a * SVT_Thr;
 
 %SVT_roc_range = [-1*bitshift(1,5) bitshift(1,0:8) [512:100:1024] [129:10:256]];
 %SVT_roc_range = [-16, 0:2:16];
-SVT_roc_range = [1:10];
-SVT_roc_range = [8:15];
+SVT_roc_range = [1:15];
 
 if ~exist([outDir, datName, detected_suffix, '_dev_eval','.mat'])
     k = 0;

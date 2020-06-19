@@ -77,14 +77,9 @@ cluster_opt.cnt_thr         =   8;
 %evaluation
 evaluation_opt.Ncluster     =   cluster_opt.Ncluster;
 
-
-
-
 % plot
 opt.filter_plot             =   0;
 detect_opt.do_plot          =   0;
 feature_opt.do_plot         =   0;
 cluster_opt.do_plot         =   0;
-
-
 

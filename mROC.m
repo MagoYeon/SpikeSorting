@@ -2,12 +2,13 @@ fprintf('Start\n\n');
 tic;
 
 fprintf('Time %3.0fs. Set Parameters \n', toc);
-set_parameters5
+%set_parameters
+set_parameters_clus
 
 roc             = 1;
 mtest_flag      = 0;
 feature_test    = 0;
-
+%
 datDir              =   opt.datDir;
 datName             =   opt.datName;
 outDir              =   opt.outDir;
@@ -130,7 +131,7 @@ end
 feature_out_My		            =   feature_extraction(		detection_out_My,	feature_opt,opt,Nchan);
 
 if(single_run)
-    [cluster_out_My_c	K_C_My_c]	=   clustering(feature_out_My, detection_out_My.channel,   detection_out_My.spike_ch, cluster_opt, opt);
+    [cluster_out_My_c	K_C_My_c]	=   My_clustering2(feature_out_My, detection_out_My.channel,   detection_out_My.spike_ch, cluster_opt, opt);
     [DA_My_c CA_My_c SA_My_c]       =   evaluation(detection_out_My.spike_time, cluster_out_My_c, gtRes, gtClu(2:end), Nsamples, cluster_opt.Ncluster, opt);
 end
 if(mtest_flag)
