@@ -5,10 +5,12 @@ fprintf('Time %3.0fs. Set Parameters \n', toc);
 %set_parameters
 set_parameters_clus
 
+%%% TEST PARAMETERS %%%%% 
 roc             = 1;
 mtest_flag      = 0;
 feature_test    = 0;
-%
+noise_DB		= 0;
+
 datDir              =   opt.datDir;
 datName             =   opt.datName;
 outDir              =   opt.outDir;
@@ -82,9 +84,16 @@ end
 plot_pause = 0;
 
 
+Nsamples = ceil(Nsamples * 0.02);
 
 Nspike = size(gtRes,1);
-in_data=filtered_data;
+
+if(noise_DB ~= 0)
+	noise_data = awgn(filtered_data,noise_DB,'measured');
+else
+	in_data=filtered_data;
+end
+
 
 if(method_NEO)
     loadNEO
@@ -93,7 +102,6 @@ if(method_NEO)
     end
 end
 if(method_SVT)
-    data = in_data;
     %loadSVT
     loadDEV
     if(roc)

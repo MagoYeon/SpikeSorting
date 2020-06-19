@@ -13,9 +13,9 @@ for peak_j = 1:Nchan
     %fprintf('ch %d start\n', peak_j);
     for peak_i = 2:Nsamples-1
         %concave = ( (data_c<data_n) && (data_c<=data_p) );
-        convex  = ( (data(peak_j,peak_i)>data(peak_j,peak_i+1)) && (data(peak_j,peak_i)>=data(peak_j,peak_i-1)) );
-        if( convex && (data(peak_j,peak_i) > 0) && (data(peak_j,peak_i) < SVT_Thr(peak_j)) ) %|| concave )
-            peak = [data(peak_j,peak_i) peak(1:average_range-1)];
+        convex  = ( (in_data(peak_j,peak_i)>in_data(peak_j,peak_i+1)) && (in_data(peak_j,peak_i)>=in_data(peak_j,peak_i-1)) );
+        if( convex && (in_data(peak_j,peak_i) > 0) && (in_data(peak_j,peak_i) < SVT_Thr(peak_j)) ) %|| concave )
+            peak = [in_data(peak_j,peak_i) peak(1:average_range-1)];
             SVT_Thr(peak_j) = mean(peak); 	
             peak_num = peak_num + 1;
             if(peak_num == average_range)

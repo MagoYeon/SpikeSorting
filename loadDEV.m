@@ -3,7 +3,7 @@ SVT_Thr = zeros(Nchan,1);
 if ~exist([outDir, datName, detected_suffix, '_Thr','.mat'])
     fprintf('Time %3.0fs. Compute Deviation ...\n', toc);
     for i = 1:Nchan
-        SVT_Thr(i) = median(abs(data(i,:)))/0.6745;
+        SVT_Thr(i) = median(abs(in_data(i,:)))/1.6745;
     end
     fprintf('Time %3.0fs. Save Deviation ...\n', toc);
     save([outDir, datName, detected_suffix, '_Thr'], 'SVT_Thr', '-v7.3');
