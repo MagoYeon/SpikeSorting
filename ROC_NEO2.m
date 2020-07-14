@@ -1,4 +1,4 @@
-function [detection_out] = ROC_NEO(in_data,NEO_data, Thr, detect_opt, opt,save_flag);
+function [detection_out] = ROC_NEO2(in_data,NEO_data, Thr, detect_opt, opt,save_flag);
 
 
 
@@ -122,6 +122,8 @@ max_amp_ch = 0;
 max_amp_time = 0;
 detect_time = 0;
 detect_done = 0;
+%% mod
+amp_thr_weight = 4;
 
 fprintf('Time %3.0fs. Detection Processing Started \n', toc);
 fprintf('\tDetection processing [%%]:      ');
@@ -141,7 +143,15 @@ while i <= Nsamples-1
 			detect_time = i;
 			detected_ch = zeros(1,Nchan,'uint8');
 			detected_ch(j) = 1;
+            %% mod
+            data_amp = zeros(1,Nchan);
+            data_amp(j) = data(j,i);
+            %%% mod
 		elseif (detected && detect_flag)
+            %% mod
+            detected_ch(j) = 1;
+            data_amp(j) = data(j,i);
+            %%% mod
             if (max_amp < data(j,i))
                 max_amp		= data(j,i);
                 max_amp_ch	= j;
@@ -154,6 +164,10 @@ while i <= Nsamples-1
 	if( detect_flag && ( ( i - detect_time) >= overlap_range) )
 		detect_flag = 0;
 		detect_done = 1;
+        %% mod
+        del_idx = find(data_amp < (max_amp/amp_thr_weight));
+        detected_ch(del_idx) = 0;
+        %%% mod
 	end
 
 	if( detect_done ) % spike detected

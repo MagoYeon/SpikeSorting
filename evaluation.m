@@ -1,4 +1,4 @@
-function [DA CA SA] = evaluation(spike_time, cluster_out, gtRes, gtClu, Nsamples, Ncluster, opt);
+function [DA CA SA FN TP FP] = evaluation(spike_time, cluster_out, gtRes, gtClu, Nsamples, Ncluster, opt);
 
 NgtClu      		=   opt.NgtClu;
 Nspike				=	size(gtRes,1);
@@ -90,14 +90,14 @@ for i = 1:NgtClu
     TCcompare(:,c) = 0;
 end
 %Camp(4)
-Cmap
+%Cmap
 
 FCluster = find(Cmap==0);
 
-fprintf('\n');
-for i = 1:NgtClu
-    fprintf('\t[Label %d:gtclu %d]\n',i,Cmap(i)); %[Cluster2:Label%d]\t[CLuster3:Label%d]\n',Cmap(1),Cmap(2),Cmap(3));
-end
+%fprintf('\n');
+%for i = 1:NgtClu
+%    fprintf('\t[Label %d:gtclu %d]\n',i,Cmap(i)); %[Cluster2:Label%d]\t[CLuster3:Label%d]\n',Cmap(1),Cmap(2),Cmap(3));
+%end
 if(FCluster)
 	fprintf('\t[Label %d:False Cluster]\n',FCluster);
 else
@@ -150,6 +150,10 @@ Cluster_error = length(CErrorIdx); % All False Positive
 DA = (detection_TP)/(detection_TP+detection_FP+detection_FN);
 CA = sum(cluster_TP)/Ndetected;
 SA = sum(cluster_TP)/(detection_TP+detection_FP+detection_FN);
+FN = cluster_FN;
+TP = cluster_TP;
+FP = cluster_FP;
+
 fprintf('\tDetection Accuracy\t- : %f\n', DA);
 fprintf('\tCluster Accuracy\t- : %f\n', CA);
 fprintf('\tSorting Accuracy\t- : %f\n', SA);

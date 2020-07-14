@@ -4,8 +4,8 @@ merge_out(3) = -1;
 data_length =   size(in_data,1);
 
 max_dis_v   =   0;
-max_dix_i1  =   0;
-max_dix_i2  =   0;
+max_dis_i1  =   0;
+max_dis_i2  =   0;
 
 
 if(K==0)

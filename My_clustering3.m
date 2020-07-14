@@ -1,4 +1,4 @@
-function [cluster_out K_C] = My_clustering2(in_data, channel, gtRes, spike_ch, cluster_opt, opt, outlier);
+function [cluster_out K_C] = My_clustering3(in_data, channel, gtRes, spike_ch, cluster_opt, opt, outlier);
 
 Fs					=	opt.Fs;
 datDir              =   opt.datDir;
@@ -215,7 +215,7 @@ mean_ch     = floor(log2(mean(ch_num,'all')));
 %weight_minmin   = bitshift(min_feat, -1*min_ch)
 weight_maxmean  = bitshift(max_feat, -1*mean_ch);
 
-%channel_weight = bitshift(1,floor(log2(weight_maxmean)));
+channel_weight = bitshift(1,floor(log2(weight_maxmean)));
 cluster_input       =   [(in_data*feature_weight), channel_weight*(double(channel))];
 
 %pause;

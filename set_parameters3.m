@@ -14,6 +14,8 @@ opt.datName = '20150601_all_s';
 %opt.datName = '20141202_all_GT';
 %opt.datName = 'kampff1';
 
+param_ID = 3;
+
 opt.outDir = './output/set3/';
 opt.dat =[opt.datDir, opt.datName, '.dat'];
 
@@ -44,7 +46,7 @@ detect_opt.halt_range       =   1;
 detect_opt.overlap_range    =   0; 
     % 0 for default : spike_length/2  <- changed
     % spikes within this range are assumed to be overlapped spike
-detect_opt.detect_method    =   'NEO%';  
+detect_opt.detect_method    =   'NEO';  
     % 'thr'     : simple threshold
     % 'dvt'    : Convex threshold
     % 'NEO'     : NEO
@@ -72,9 +74,10 @@ cluster_opt.merge_weight    =   16; % bigger 16, 32
 cluster_opt.mean_weight     =   1;
 cluster_opt.max_dis_thr     =   0;
 cluster_opt.min_dis_thr     =   1000; %867?
-cluster_opt.ch_m_range      =   2;
-cluster_opt.spike_p_sec     =   7;
-cluster_opt.cnt_thr         =   8;
+cluster_opt.ch_m_range      =   1;
+cluster_opt.spike_p_sec     =   1;
+cluster_opt.cnt_thr         =   3;
+cluster_opt.ch_label_term   =   10;
 
 %evaluation
 evaluation_opt.Ncluster     =   cluster_opt.Ncluster;

@@ -1,4 +1,4 @@
-function [cluster_out K_C] = My_clustering(in_data, channel, spike_ch, cluster_opt, opt);
+function [cluster_out K_C] = My_clustering(in_data, channel, spike_ch, cluster_opt, opt, outlier);
 
 datDir              =   opt.datDir;
 datName             =   opt.datName;
@@ -12,7 +12,8 @@ NgtClu              =   opt.NgtClu;
 spike_length		=	opt.spike_length;
 Nchan				=	opt.Nchan;
 
-Ncluster            =   cluster_opt.Ncluster;
+Ncluster            =   6;
+%Ncluster            =   cluster_opt.Ncluster;
 feature_weight      =   cluster_opt.feature_weight;
 channel_weight      =   cluster_opt.channel_weight;
 do_plot             =   cluster_opt.do_plot;
@@ -27,6 +28,16 @@ clr = lines(Ncluster);
 
 
 cluster_input       =   [(in_data*feature_weight), (double(channel)*channel_weight)];
+
+if outlier ~= 0
+    for i =1:outlier
+        outlier_input = ones(1,size(cluster_input,2))*1000000000*i;
+        %outlier_input(i+2) = 1000000000;
+        cluster_input(i*10,:)  = outlier_input;
+    end
+end
+
+
 cluster_input       =   double(cluster_input);
 
 fprintf('Cluster Info.\n');
@@ -47,17 +58,18 @@ K_C_merge_cnt	=	0;
 K_C_new_cnt	=	0;
 K_C_ex_cnt	=	0;
 
-j = 1; % K_C num
+j = Ncluster; % K_C num
 min_v(1)		=	0;
 max_v(1)		=	0;
 K_C_tmp(1,:)	=	cluster_input(1,:);
 k = 1;
 
+
 K_C_tmp(1:Ncluster,:) = cluster_input(1:Ncluster,:);
 
 for i = Ncluster+1:size(cluster_input, 1)
 	K_C_tmp(Ncluster+1,:)	=	cluster_input(i,:);
-	merge_out	=	c_merge(K_C_tmp(1:j+1,:), j+1, mean_weight);
+	merge_out	=	c_merge(K_C_tmp(1:j+1,:), j+1, 1.5);
 	min_idx1	=	merge_out(1);
 	min_idx2	=	merge_out(2);
 	min_v(i)	=	merge_out(3);
@@ -69,7 +81,8 @@ for i = Ncluster+1:size(cluster_input, 1)
     K_C_tmp(min_idx1,:)		=	(K_C_tmp(min_idx1,:)*(merge_weight-1)+K_C_tmp(min_idx2,:))/(merge_weight);
     K_C_merge_cnt			=	K_C_merge_cnt + 1;
     K_C_count1(min_idx1)	=	K_C_count1(min_idx1) + 1;
-    K_C_tmp(max_idx2,:)		=	cluster_input(i,:);
+    K_C_tmp(min_idx2,:)		=	cluster_input(i,:);
+
 	%else
 	%	if(j ~= Ncluster)	% new mean
 	%		j = j + 1;

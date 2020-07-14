@@ -14,6 +14,8 @@ opt.datDir = '/home/sykim/Project/neuro/MEAs_dataset/phy/set6/';
 opt.datName = '20141202_all_GT';
 %opt.datName = 'kampff1';
 
+param_ID = 6;
+
 opt.outDir = './output/set6/';
 opt.dat =[opt.datDir, opt.datName, '.dat'];
 
@@ -51,7 +53,7 @@ detect_opt.align_opt        =   'det';
     % 'det'     : detected point itself
     % 'slope'   : max slope
     % 'amp'     : max amp
-detect_opt.NEO_C            =   64; 
+detect_opt.NEO_C            =   128; 
     % many researches set C = 8 (empirically)
     % for this dataset, 128 shows best metric value
     % for this dataset, 64 is best for SDC
@@ -63,16 +65,17 @@ feature_opt.sum_idx         = detect_opt.align_idx;
 feature_opt.spike_length    = detect_opt.spike_length;
 
 % cluster
-cluster_opt.Ncluster        =   8; %opt.NgtClu+1; % 0 : set automatically
+cluster_opt.Ncluster        =   9; %opt.NgtClu+1; % 0 : set automatically
 cluster_opt.feature_weight  =   1;		
 cluster_opt.channel_weight  =   bitshift(1,10);% bitshift(1,10) = %1024
 cluster_opt.merge_weight    =   16; % bigger 16, 32
 cluster_opt.mean_weight     =   1;
 cluster_opt.max_dis_thr     =   0;
 cluster_opt.min_dis_thr     =   1000; %867?
-cluster_opt.ch_m_range      =   2;
-cluster_opt.spike_p_sec     =   7;
-cluster_opt.cnt_thr         =   8;
+cluster_opt.ch_m_range      =   1;
+cluster_opt.spike_p_sec     =   0.1;
+cluster_opt.cnt_thr         =   3;
+cluster_opt.ch_label_term   =   10;
 
 %evaluation
 evaluation_opt.Ncluster     =   cluster_opt.Ncluster;

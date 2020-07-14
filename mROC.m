@@ -2,14 +2,16 @@ fprintf('Start\n\n');
 tic;
 
 fprintf('Time %3.0fs. Set Parameters \n', toc);
-%set_parameters
-set_parameters_clus
+set_parameters
+%set_parameters_clus
 
 %%% TEST PARAMETERS %%%%% 
-roc             = 1;
+roc             = 0;
+single_run		= 1;
 mtest_flag      = 0;
 feature_test    = 0;
 noise_DB		= 0;
+batch_size		= 10; % [%]
 
 datDir              =   opt.datDir;
 datName             =   opt.datName;
@@ -31,11 +33,11 @@ Thr_a               =   detect_opt.Thr_a;
 
 fprintf('Time %3.0fs. Load gtRes \n', toc);
 fid = fopen([datDir,datName,'.res.1'], 'r'); 
-gtRes = int32(fscanf(fid, '%d')); 
+ori_gtRes = int32(fscanf(fid, '%d')); 
 
 fprintf('Time %3.0fs. Load gtClu \n', toc);
 fid = fopen([datDir,datName,'.clu.1'], 'r'); 
-gtClu = int32(fscanf(fid, '%d')); 
+ori_gtClu = int32(fscanf(fid, '%d')); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 method_NEO	= strcmp(detect_method , 'NEO');
@@ -51,7 +53,7 @@ if(cluster_opt.Ncluster == 0)
     cluster_opt.Ncluster = opt.NgtClu;
 end
 
-writematrix(gtClu,[outDir, datName, '_gtClu'], 'Delimiter', 'tab');
+writematrix(ori_gtClu,[outDir, datName, '_gtClu'], 'Delimiter', 'tab');
 %%
 
 % File read
@@ -59,23 +61,43 @@ writematrix(gtClu,[outDir, datName, '_gtClu'], 'Delimiter', 'tab');
 
 if ~exist([outDir, datName, filtered_suffix, '.mat'])
 	[rawData Nsamples] = read_rawData(dat,Nchan);
-	filtered_data = filter_data(rawData, opt);
+	ori_filtered_data = filter_data(rawData, opt);
 	clearvars rawData;
 else
 	fprintf('\tFiltered Data Exists\n');
     tic;
     fprintf('Time %3.0fs. Loading Filtered Data Started \n', toc);
-    filtered_data = load([outDir, datName,filtered_suffix, '.mat']).filtered_int16_data;
+    ori_filtered_data = load([outDir, datName,filtered_suffix, '.mat']).filtered_int16_data;
 	fprintf('Time %3.0fs. Loading Filtered Data Finished \n', toc);
     
-    Nsamples = size(filtered_data, 2);
+    Nsamples = size(ori_filtered_data, 2);
 end
+
+if batch_size ~= 0	% 1 try
+    Nsamples = size(ori_filtered_data, 2);
+	Nsamples	= ceil(Nsamples * batch_size * 0.01);
+	Nspike		= find(ori_gtRes > Nsamples,1) - 1;
+	gtRes		= ori_gtRes(1:Nspike);
+	gtClu		= ori_gtClu(1:Nspike+1);
+end
+
 
 if(opt.reverse)
     fprintf('Time %3.0fs. Reversing data...\n', toc);
-    filtered_data = -1*filtered_data;
+    filtered_data = -1*ori_filtered_data;
 end
 
+%%% get data for simulation
+%target_spike = 1
+%simul_time = gtRes(target_spike)+100;
+%simul_data = zeros(Nchan*simul_time,1);
+%data_tmp = filtered_data(:,1:simul_time);
+%for i = 1:simul_time
+%	i_start = 1+(i-1)*Nchan;
+%	i_end	= i_start+Nchan-1;
+%	simul_data(i_start:i_end,1) = filtered_data(:,i);
+%end
+%writematrix(simul_data,[outDir, datName, '_simul_data_',num2str(target_spike)], 'Delimiter', 'tab');
 
 gtResFlatten = zeros(1, Nsamples);
 for idx = 1:length(gtRes)
@@ -84,19 +106,19 @@ end
 plot_pause = 0;
 
 
-Nsamples = ceil(Nsamples * 0.02);
-
-Nspike = size(gtRes,1);
-
 if(noise_DB ~= 0)
-	noise_data = awgn(filtered_data,noise_DB,'measured');
+	noise_data = awgn(filtered_data(:,1:Nsamples),noise_DB,'measured');
+	in_data=noise_data;
 else
-	in_data=filtered_data;
+	in_data=filtered_data(:,1:Nsamples);
 end
 
 
 if(method_NEO)
     loadNEO
+    NEO_C = detect_opt.NEO_C;
+    Nspike = size(gtRes,1);
+    Thr = NEO_C * NEO_Thr;
     if(roc)
         mtestNEO
     end
@@ -115,33 +137,61 @@ if(method_ABS)
     end
 end
 
-if(roc)
-    figure;
-    hold on
-    if(method_NEO)
-        plot(1-(NEO_TN/(Nsamples -Nspike)),NEO_TP/Nspike,'r--o');
-        legend({'NEO'});
-    end
-    if(method_SVT)
-        plot(1-(SVT_TN/(Nsamples -Nspike)),SVT_TP/Nspike,'b--o');
-        legend({'SVT'});
-    end
-    if(method_ABS)
-        plot(1-(abs_TN/(Nsamples -Nspike)),abs_TP/Nspike,'k--o');
-        legend({'ABS'});
-    end
-    hold off
-    xlabel('Probability of False Alarm')
-    ylabel('Probability of Detection')
-    set(gcf,'color','w');
-end
-
+%if(roc)
+%    figure;
+%    hold on
+%    if(method_NEO)
+%        plot(1-(NEO_TN/(Nsamples -Nspike)),NEO_TP/Nspike,'r--o');
+%        legend({'NEO'});
+%    end
+%    if(method_SVT)
+%        plot(1-(SVT_TN/(Nsamples -Nspike)),SVT_TP/Nspike,'b--o');
+%        legend({'SVT'});
+%    end
+%    if(method_ABS)
+%        plot(1-(abs_TN/(Nsamples -Nspike)),abs_TP/Nspike,'k--o');
+%        legend({'ABS'});
+%    end
+%    hold off
+%    xlabel('Probability of False Alarm')
+%    ylabel('Probability of Detection')
+%    set(gcf,'color','w');
+%end
+Thr = detect_opt.NEO_C * NEO_Thr;
+detection_out_My = ROC_NEO(in_data,NEO_data, Thr, detect_opt, opt, 1);
+detection_out_My2 = ROC_NEO2(in_data,NEO_data, Thr, detect_opt, opt, 1);
 feature_out_My		            =   feature_extraction(		detection_out_My,	feature_opt,opt,Nchan);
+feature_out_My2		            =   feature_extraction(		detection_out_My2,	feature_opt,opt,Nchan);
 
 if(single_run)
-    [cluster_out_My_c	K_C_My_c]	=   My_clustering2(feature_out_My, detection_out_My.channel,   detection_out_My.spike_ch, cluster_opt, opt);
-    [DA_My_c CA_My_c SA_My_c]       =   evaluation(detection_out_My.spike_time, cluster_out_My_c, gtRes, gtClu(2:end), Nsamples, cluster_opt.Ncluster, opt);
+    [cluster_out_My_c	K_C_My_c]	=   My_clustering3(feature_out_My, detection_out_My.channel, gtRes,  detection_out_My.spike_ch, cluster_opt, opt, 0);
+    [cluster_out_My_c2	K_C_My_c2]	=   My_clustering3(feature_out_My2, detection_out_My2.channel, gtRes,  detection_out_My.spike_ch, cluster_opt, opt, 0);
+    [DA_My_c CA_My_c SA_My_c FN_My_c TP_My_c FP_My_c]       =   evaluation(detection_out_My.spike_time, cluster_out_My_c, gtRes, gtClu(2:end), Nsamples, cluster_opt.Ncluster, opt);
+    [DA_My_c2 CA_My_c2 SA_My_c2 FN_My_c2 TP_My_c2 FP_My_c2]       =   evaluation(detection_out_My2.spike_time, cluster_out_My_c2, gtRes, gtClu(2:end), Nsamples, cluster_opt.Ncluster, opt);
+
+	eval_out.DA_My_c	=	DA_My_c;
+	eval_out.CA_My_c	=	CA_My_c;
+	eval_out.SA_My_c	=	SA_My_c;
+	eval_out.FN_My_c	=	FN_My_c;
+	eval_out.TP_My_c	=	TP_My_c;
+	eval_out.FP_My_c	=	FP_My_c;
+	eval_out.DA_My_c2	=	DA_My_c2;
+	eval_out.CA_My_c2	=	CA_My_c2;
+	eval_out.SA_My_c2	=	SA_My_c2;
+	eval_out.FN_My_c2	=	FN_My_c2;
+	eval_out.TP_My_c2	=	TP_My_c2;
+	eval_out.FP_My_c2	=	FP_My_c2;
+
+    fprintf('save\n');
+	save([outDir, datName, '_eval_' ,num2str(param_ID)], 'eval_out');
 end
+    %for i = 1:9
+    %    fprintf('%d\t: %f\t%f |\t',i,int16(K_C_My_c2(i,1)),int16(K_C_My_c2(2)));
+    %    fprintf('%d ',find(K_C_My_c2(i,3:end)~=0));
+    %    fprintf('\n');
+    %end
+
+    %writematrix(int16(Thr),[outDir, datName, '_Thr_tmp'], 'Delimiter', 'tab');
 if(mtest_flag)
     mtest
 end
